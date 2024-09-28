@@ -8,21 +8,19 @@ const transaksiModel = require(`../models/index`).transaksi
 const detailTransaksiModel = require(`../models/index`).detail_transaksi
 const Op = require("sequelize").Op
 
-exports.getTransaksiKasir = async (req, res) => {
-  const { id_user } = req.user; // Get id_user from req.user
-
-  console.log("User ID from token:", id_user); // Debugging
+exports.getTransaksiByIdUser = async (req, res) => {
+  const id_user = req.params.id;
 
   if (!id_user) {
     return res.status(400).json({
       status: false,
-      message: "ID user tidak ditemukan dalam token.",
+      message: "ID user tidak ditemukan.",
     });
   }
 
   try {
     const result = await transaksiModel.findAll({
-      where: { id_user }, // Filter by cashier's user ID
+      where: { id_user: id_user },
       include: [
         "user",
         "meja",
@@ -32,13 +30,15 @@ exports.getTransaksiKasir = async (req, res) => {
           include: ["menu"],
         },
       ],
-      order: [["id_transaksi", "DESC"]],
+      order: [
+        ["id_transaksi", "DESC"]
+      ],
     });
 
     if (result.length === 0) {
       return res.json({
         status: true,
-        message: "Tidak ada transaksi ditemukan.",
+        message: "Tidak ada transaksi ditemukan untuk user ini.",
         data: [],
       });
     }

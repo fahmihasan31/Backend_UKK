@@ -6,7 +6,11 @@ const bodyParser = require('body-parser');
 const port = 8000;
 require('dotenv').config();
 
-app.use(cors());
+app.use(cors({
+  credentials: true,
+  origin: 'http://localhost:8000'
+}));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

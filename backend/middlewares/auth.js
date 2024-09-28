@@ -3,8 +3,6 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 const verify = (req, res, next) => {
   let headers = req.headers.authorization;
-
-  // Cek apakah ada headers authorization dan memisahkan token
   let token = headers && headers.split(" ")[1]; // Mengambil token setelah "Bearer"
 
   if (!token) {
