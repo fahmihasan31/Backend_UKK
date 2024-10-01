@@ -24,7 +24,14 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
-    nomor_meja: DataTypes.STRING
+    nomor_meja: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM('terisi', 'kosong'),
+      defaultValue: 'kosong' // Default value ditentukan di sini
+    }
   }, {
     sequelize,
     modelName: 'meja',

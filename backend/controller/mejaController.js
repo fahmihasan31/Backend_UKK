@@ -34,6 +34,30 @@ exports.findMeja = async (req, res) => {
   }
 }
 
+exports.statusMeja = async (req, res) => {
+  const param = { status: req.params.status }
+  try {
+    const meja = await mejaModel.findAll({ where: param })
+    if (meja.length > 0) {
+      return res.status(200).json({
+        status: true,
+        data: meja,
+        message: 'data meja ditemukan'
+      })
+    } else {
+      return res.status(404).json({
+        status: false,
+        message: 'data meja tidak ditemukan'
+      })
+    }
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message
+    })
+  }
+}
+
 exports.addMeja = async (req, res) => {
   const { nomor_meja } = req.body
   if (!nomor_meja) {
@@ -59,15 +83,26 @@ exports.addMeja = async (req, res) => {
 
 exports.updateMeja = async (req, res) => {
   const id_meja = req.params.id
-  const { nomor_meja } = req.body
+  const { nomor_meja, status } = req.body
   try {
-    const result = await mejaModel.update(
-      { nomor_meja: nomor_meja },
-      { where: { id_meja: id_meja } })
+    const meja = await mejaModel.findOne({ where: { id_meja } });
+
+    // Jika meja tidak ditemukan, return error
+    if (!meja) {
+      return res.status(404).json({
+        status: false,
+        message: `Meja dengan ID ${id_meja} tidak ditemukan`
+      });
+    }
+
+    await meja.update({
+      nomor_meja: nomor_meja,
+      status: status
+    });
 
     return res.status(200).json({
       status: true,
-      data: result,
+      data: meja,
       message: 'data meja di update'
     })
   } catch (error) {

@@ -1,86 +1,89 @@
-// src/pages/Login.jsx
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { LoginUser, reset } from "../features/authSlice";
+import React, { useState } from "react";
+import backgroundImage from "../assets/image-login5.png";
 
-const Login = () => {
+const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { user, isError, isSuccess, isLoading, message } = useSelector(
-    (state) => state.auth
-  );
-
-  useEffect(() => {
-    if (user || isSuccess) {
-      if (user?.role === "admin") {
-        navigate("/admin-dashboard");
-      } else if (user?.role === "kasir") {
-        navigate("/kasir-dashboard");
-      } else if (user?.role === "manajer") {
-        navigate("/manajer-dashboard");
-      }
-    }
-    dispatch(reset());
-  }, [user, isSuccess, dispatch, navigate]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    dispatch(LoginUser({ username, password }));
+    setIsLoading(true);
+    setIsError(false);
+
+    // Simulasi proses login
+    setTimeout(() => {
+      if (username === "admin" && password === "password") {
+        console.log("Login success");
+        setMessage("Login successful");
+      } else {
+        setIsError(true);
+        setMessage("Invalid username or password");
+      }
+      setIsLoading(false);
+    }, 2000);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Masuk</h1>
-        {isError && <p className="text-red-500 text-sm text-center mb-4">{message}</p>}
-        <p className="text-md text-center mb-4">Masuk untuk mulai mencari menu favorit kalian</p>
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
-            <input
-              type="text"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
-            <div className="relative">
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Gambar Latar Belakang */}
+      <div className="hidden lg:flex lg:w-2/5"> {/* Kurangi lebar gambar menjadi 2/5 */}
+        <img
+          src={backgroundImage}
+          alt="Background"
+          className="object-cover w-full h-full"
+        />
+      </div>
+
+      {/* Form Login */}
+      <div className="flex items-center justify-center w-full lg:w-3/5 bg-white"> {/* Perbesar form menjadi 3/5 */}
+        <div className="w-full max-w-2xl p-6 space-y-4"> {/* Lebarkan form dengan max-w-2xl */}
+          <h1 className="text-3xl font-bold text-blue-600">Masuk ke Akun Anda</h1>
+          <p className="text-gray-500">Masuk untuk mulai mencari menu favorit kalian</p>
+
+          {isError && <p className="text-red-500">{message}</p>}
+
+          {/* Form Input */}
+          <form onSubmit={handleLogin} className="space-y-3">
+            <div>
               <input
-                type={showPassword ? "text" : "password"}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                type="text"
+                id="username"
+                name="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="block w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Username"
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                id="password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="block w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Password"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 focus:outline-none"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
             </div>
-          </div>
-          <button
-            type="submit"
-            className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full ${isLoading ? "opacity-50" : ""}`}
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : "Masuk"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              className={`w-full py-3 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-colors ${isLoading ? "cursor-not-allowed opacity-50" : ""
+                }`}
+              disabled={isLoading}
+            >
+              {isLoading ? "Loading..." : "Masuk"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default LoginPage;

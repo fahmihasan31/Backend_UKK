@@ -137,15 +137,25 @@ exports.getTransaksiFilteredByDate = async (req, res) => {
   try {
     const { startDate, endDate, order } = req.query;
 
-    let sortOrder;
-
-    if (order && order.toLowerCase() === 'desc') {
-      sortOrder = 'DESC'
-    } else {
-      sortOrder = 'ASC'
+    // Validasi tanggal
+    const isValidDate = (date) => !isNaN(new Date(date).getTime());
+    if (startDate && !isValidDate(startDate)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format tanggal mulai tidak valid'
+      });
+    }
+    if (endDate && !isValidDate(endDate)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format tanggal akhir tidak valid'
+      });
     }
 
-    // Membangun query untuk filtering berdasarkan tanggal
+    // Set default sortOrder
+    let sortOrder = order && order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
+
+    // Build the query for filtering by date
     const whereClause = {};
 
     if (startDate && endDate) {
@@ -161,15 +171,20 @@ exports.getTransaksiFilteredByDate = async (req, res) => {
         [Op.lte]: new Date(endDate)
       };
     }
-    // Mencari transaksi berdasarkan filter tanggal dan mengurutkannya
+
+    // Find transactions based on the date filter and sort them
     const transaksi = await transaksiModel.findAll({
       where: whereClause,
       include: [
-        { model: detailTransaksiModel, as: 'detail_transaksi', include: [{ model: menuModel, as: 'menu' }] },
+        {
+          model: detailTransaksiModel,
+          as: 'detail_transaksi',
+          include: [{ model: menuModel, as: 'menu' }]
+        },
         { model: userModel, as: 'user' },
         { model: mejaModel, as: 'meja' }
       ],
-      order: [['tgl_transaksi', sortOrder]] // Mengurutkan berdasarkan tanggal transaksi
+      order: [['tgl_transaksi', sortOrder]] // Sort by transaction date
     });
 
     if (!transaksi || transaksi.length === 0) {
@@ -178,6 +193,7 @@ exports.getTransaksiFilteredByDate = async (req, res) => {
         message: 'Tidak ada transaksi yang ditemukan pada rentang tanggal tersebut'
       });
     }
+
     return res.status(200).json({
       success: true,
       message: 'Transaksi berhasil diambil',
@@ -192,14 +208,28 @@ exports.getTransaksiFilteredByDate = async (req, res) => {
   }
 };
 
-exports.searchByKasir = async (req, res) => {
-
-}
-
 exports.addTransaksi = async (req, res) => {
   const { id_user, id_meja, nama_pelanggan, status, detailTransaksi } = req.body;
 
   try {
+    // Cek status meja sebelum menambahkan transaksi
+    const meja = await mejaModel.findOne({ where: { id_meja } });
+
+    if (!meja) {
+      return res.status(404).json({
+        status: false,
+        message: `Meja dengan ID ${id_meja} tidak ditemukan`,
+      });
+    }
+
+    if (meja.status === "terisi") {
+      return res.status(400).json({
+        status: false,
+        message: `Meja dengan ID ${id_meja} sudah terisi`,
+      });
+    }
+
+    // Buat transaksi baru
     const transaksi = await transaksiModel.create({
       tgl_transaksi: new Date(),
       id_user,
@@ -208,8 +238,16 @@ exports.addTransaksi = async (req, res) => {
       status: status || "belum_bayar",
     });
 
+    if (transaksi.status === "belum_bayar") {
+      await mejaModel.update(
+        { status: "terisi" },
+        { where: { id_meja: id_meja } }
+      );
+    }
+
     let totalHarga = 0;
 
+    // Tambahkan detail transaksi
     if (detailTransaksi && detailTransaksi.length > 0) {
       for (const detail of detailTransaksi) {
         const menu = await menuModel.findOne({ where: { id_menu: detail.id_menu } });
@@ -233,6 +271,7 @@ exports.addTransaksi = async (req, res) => {
         });
       }
     }
+
     return res.status(200).json({
       status: true,
       message: "Transaksi berhasil ditambahkan",
@@ -254,90 +293,45 @@ exports.addTransaksi = async (req, res) => {
 
 exports.updateTransaksi = async (req, res) => {
   const id_transaksi = req.params.id;
-  const { id_user, id_meja, nama_pelanggan, status, detailTransaksi } = req.body;
+  const { status } = req.body;
 
-  console.log('ID Transaksi:', id_transaksi);
-  console.log('Request Body:', req.body);
+  console.log("ID Transaksi:", id_transaksi);
 
   try {
-    if (!id_transaksi) {
-      return res.status(400).json({
-        status: false,
-        message: 'ID transaksi tidak boleh kosong'
-      });
-    }
-
-    // Fetch the existing transaction
     const transaksi = await transaksiModel.findOne({ where: { id_transaksi: id_transaksi } });
 
     if (!transaksi) {
       return res.status(404).json({
         status: false,
-        message: 'Transaksi tidak ditemukan'
+        message: `Transaksi dengan ID ${id_transaksi} tidak ditemukan`,
       });
     }
 
-    // Update the transaction details
-    await transaksiModel.update({
-      id_user,
-      id_meja,
-      nama_pelanggan,
-      status: status || transaksi.status,
-    }, { where: { id_transaksi } });
-
-    // Remove existing detail transactions
-    await detailTransaksiModel.destroy({ where: { id_transaksi } });
-
-    let totalHarga = 0;
-
-    // Process new detail transactions
-    if (detailTransaksi && detailTransaksi.length > 0) {
-      for (const detail of detailTransaksi) {
-        const menu = await menuModel.findOne({ where: { id_menu: detail.id_menu } });
-
-        if (!menu) {
-          return res.status(404).json({
-            status: false,
-            message: `Menu dengan id ${detail.id_menu} tidak ditemukan`
-          });
-        }
-
-        const subTotal = menu.harga * detail.qty;
-        totalHarga += subTotal;
-
-        // Add new detail transaction
-        await detailTransaksiModel.create({
-          id_transaksi,
-          id_menu: detail.id_menu,
-          harga: menu.harga,
-          qty: detail.qty,
-          total: subTotal,
-        });
-      }
-    }
-
-    // Update the total price of the transaction
+    // Update status transaksi
     await transaksiModel.update(
-      { total_harga: totalHarga },
-      { where: { id_transaksi } }
+      { status },
+      { where: { id_transaksi: id_transaksi } }
     );
 
-    // Return success response
+    if (status === "lunas") {
+      await mejaModel.update(
+        { status: "kosong" },
+        { where: { id_meja: transaksi.id_meja } }
+      );
+    }
+
     return res.status(200).json({
       status: true,
-      message: "Data transaksi berhasil diperbarui",
+      message: "Status transaksi berhasil diupdate",
       data: {
         id_transaksi,
-        total_bayar: totalHarga,
-        detail_transaksi: detailTransaksi,
-      }
+        status,
+      },
     });
   } catch (error) {
-    console.error('Error:', error);
     return res.status(500).json({
       status: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
-
