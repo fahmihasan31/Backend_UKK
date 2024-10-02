@@ -134,78 +134,53 @@ exports.getNota = async (req, res) => {
 };
 
 exports.getTransaksiFilteredByDate = async (req, res) => {
-  try {
-    const { startDate, endDate, order } = req.query;
+  const param = { tgl_transaksi: req.params.tgl_transaksi };
 
-    // Validasi tanggal
-    const isValidDate = (date) => !isNaN(new Date(date).getTime());
-    if (startDate && !isValidDate(startDate)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Format tanggal mulai tidak valid'
-      });
-    }
-    if (endDate && !isValidDate(endDate)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Format tanggal akhir tidak valid'
-      });
-    }
-
-    // Set default sortOrder
-    let sortOrder = order && order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
-
-    // Build the query for filtering by date
-    const whereClause = {};
-
-    if (startDate && endDate) {
-      whereClause.tgl_transaksi = {
-        [Op.between]: [new Date(startDate), new Date(endDate)]
-      };
-    } else if (startDate) {
-      whereClause.tgl_transaksi = {
-        [Op.gte]: new Date(startDate)
-      };
-    } else if (endDate) {
-      whereClause.tgl_transaksi = {
-        [Op.lte]: new Date(endDate)
-      };
-    }
-
-    // Find transactions based on the date filter and sort them
-    const transaksi = await transaksiModel.findAll({
-      where: whereClause,
+  transaksiModel
+    .findAll({
+      where: {
+        tgl_transaksi: {
+          [Op.between]: [
+            param.tgl_transaksi + " 00:00:00",
+            param.tgl_transaksi + " 23:59:59",
+          ], // mencari data transaksi berdasarkan tanggal transaksi yang dikirimkan melalui parameter
+        },
+      },
       include: [
         {
-          model: detailTransaksiModel,
-          as: 'detail_transaksi',
-          include: [{ model: menuModel, as: 'menu' }]
+          model: userModel,
+          as: "user",
         },
-        { model: userModel, as: 'user' },
-        { model: mejaModel, as: 'meja' }
+        {
+          model: mejaModel,
+          as: "meja",
+        },
       ],
-      order: [['tgl_transaksi', sortOrder]] // Sort by transaction date
-    });
-
-    if (!transaksi || transaksi.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Tidak ada transaksi yang ditemukan pada rentang tanggal tersebut'
+      order: [['tgl_transaksi', 'DESC']], // Mengurutkan berdasarkan tgl_transaksi dari yang lama ke terbaru (ascending)
+    })
+    .then((result) => {
+      if (result.length === 0) {
+        // jika data tidak ditemukan
+        res.status(404).json({
+          status: "error",
+          message: "data tidak ditemukan",
+        });
+      } else {
+        // jika data ditemukan
+        res.status(200).json({
+          status: "success",
+          message: "data ditemukan",
+          data: result,
+        });
+      }
+    })
+    .catch((error) => {
+      // jika gagal
+      res.status(400).json({
+        status: "error",
+        message: error.message,
       });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: 'Transaksi berhasil diambil',
-      data: transaksi
     });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Terjadi kesalahan pada server',
-      error: error.message
-    });
-  }
 };
 
 exports.addTransaksi = async (req, res) => {

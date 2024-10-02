@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import backgroundImage from "../assets/image-login5.png";
+import { useNavigate } from "react-router-dom"; // Import useNavigate dari react-router-dom
+import { handleLogin } from "./ApiHandler"; // Import function handleLogin
+import backgroundImage from "../../assets/image-login5.png";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -7,29 +9,38 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate(); // Gunakan useNavigate untuk redirect
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setIsError(false);
 
-    // Simulasi proses login
-    setTimeout(() => {
-      if (username === "admin" && password === "password") {
-        console.log("Login success");
-        setMessage("Login successful");
-      } else {
-        setIsError(true);
-        setMessage("Invalid username or password");
-      }
+    const result = await handleLogin(username, password);
+
+    if (result.success) {
+      setMessage(result.message);
       setIsLoading(false);
-    }, 2000);
+
+      // Redirect berdasarkan role pengguna
+      if (result.role === "admin") {
+        navigate("/dashboard/admin");
+      } else if (result.role === "manajer") {
+        navigate("/dashboard/manajer");
+      } else if (result.role === "kasir") {
+        navigate("/dashboard/kasir");
+      }
+    } else {
+      setIsError(true);
+      setMessage(result.message);
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Gambar Latar Belakang */}
-      <div className="hidden lg:flex lg:w-2/5"> {/* Kurangi lebar gambar menjadi 2/5 */}
+      <div className="hidden lg:flex lg:w-2/5">
         <img
           src={backgroundImage}
           alt="Background"
@@ -37,16 +48,14 @@ const LoginPage = () => {
         />
       </div>
 
-      {/* Form Login */}
-      <div className="flex items-center justify-center w-full lg:w-3/5 bg-white"> {/* Perbesar form menjadi 3/5 */}
-        <div className="w-full max-w-2xl p-6 space-y-4"> {/* Lebarkan form dengan max-w-2xl */}
+      <div className="flex items-center justify-center w-full lg:w-3/5 bg-white">
+        <div className="w-full max-w-2xl p-6 space-y-4">
           <h1 className="text-3xl font-bold text-blue-600">Masuk ke Akun Anda</h1>
           <p className="text-gray-500">Masuk untuk mulai mencari menu favorit kalian</p>
 
           {isError && <p className="text-red-500">{message}</p>}
 
-          {/* Form Input */}
-          <form onSubmit={handleLogin} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <input
                 type="text"
@@ -57,6 +66,7 @@ const LoginPage = () => {
                 className="block w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Username"
                 required
+                autocomplete="username"
               />
             </div>
             <div>
@@ -69,6 +79,7 @@ const LoginPage = () => {
                 className="block w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Password"
                 required
+                autocomplete="current-password"
               />
             </div>
             <button

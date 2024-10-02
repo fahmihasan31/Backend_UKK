@@ -13,6 +13,6 @@ router.put("/update/:id", auth.verify, middleware.isKasir, updateTransaksi);
 
 //manajer
 router.get("/manajer", auth.verify, middleware.isManajer, getTransaksiManajer);
-router.get("/manajer/FilterDate/date", auth.verify, middleware.isManajer, getTransaksiFilteredByDate);
+router.get("/manajer/FilterDate/:tgl_transaksi", auth.verify, middleware.isManajer, getTransaksiFilteredByDate);
 
 module.exports = router;
