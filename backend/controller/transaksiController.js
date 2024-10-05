@@ -193,15 +193,49 @@ exports.addTransaksi = async (req, res) => {
     if (!meja) {
       return res.status(404).json({
         status: false,
-        message: `Meja dengan ID ${id_meja} tidak ditemukan`,
+        message: `Meja dengan ID ${id_meja} tidak ditemukan.`,
       });
     }
 
     if (meja.status === "terisi") {
       return res.status(400).json({
         status: false,
-        message: `Meja dengan ID ${id_meja} sudah terisi`,
+        message: `Meja dengan ID ${id_meja} sudah terisi. Cari meja yang lain.`,
       });
+    }
+
+    // Validasi detail transaksi
+    if (!detailTransaksi || detailTransaksi.length === 0) {
+      return res.status(400).json({
+        status: false,
+        message: 'Detail transaksi tidak boleh kosong.',
+      });
+    }
+
+    // Cek setiap menu di detailTransaksi
+    for (const detail of detailTransaksi) {
+      if (!detail.id_menu) {
+        return res.status(400).json({
+          status: false,
+          message: 'ID menu tidak boleh kosong.',
+        });
+      }
+
+      if (!detail.qty) {
+        return res.status(400).json({
+          status: false,
+          message: 'Qty tidak boleh kosong untuk ID menu ' + detail.id_menu,
+        });
+      }
+
+      const menu = await menuModel.findOne({ where: { id_menu: detail.id_menu } });
+
+      if (!menu) {
+        return res.status(404).json({
+          status: false,
+          message: `Menu dengan ID ${detail.id_menu} tidak ditemukan. Silakan periksa dan coba lagi.`,
+        });
+      }
     }
 
     // Buat transaksi baru
@@ -223,28 +257,19 @@ exports.addTransaksi = async (req, res) => {
     let totalHarga = 0;
 
     // Tambahkan detail transaksi
-    if (detailTransaksi && detailTransaksi.length > 0) {
-      for (const detail of detailTransaksi) {
-        const menu = await menuModel.findOne({ where: { id_menu: detail.id_menu } });
+    for (const detail of detailTransaksi) {
+      const menu = await menuModel.findOne({ where: { id_menu: detail.id_menu } });
 
-        if (!menu) {
-          return res.status(404).json({
-            status: false,
-            message: `Menu dengan id ${detail.id_menu} tidak ditemukan`,
-          });
-        }
+      const subTotal = menu.harga * detail.qty;
+      totalHarga += subTotal;
 
-        const subTotal = menu.harga * detail.qty;
-        totalHarga += subTotal;
-
-        await detailTransaksiModel.create({
-          id_menu: detail.id_menu,
-          id_transaksi: transaksi.id_transaksi,
-          harga: menu.harga,
-          qty: detail.qty,
-          total: subTotal,
-        });
-      }
+      await detailTransaksiModel.create({
+        id_menu: detail.id_menu,
+        id_transaksi: transaksi.id_transaksi,
+        harga: menu.harga,
+        qty: detail.qty,
+        total: subTotal,
+      });
     }
 
     return res.status(200).json({
@@ -269,8 +294,6 @@ exports.addTransaksi = async (req, res) => {
 exports.updateTransaksi = async (req, res) => {
   const id_transaksi = req.params.id;
   const { status } = req.body;
-
-  console.log("ID Transaksi:", id_transaksi);
 
   try {
     const transaksi = await transaksiModel.findOne({ where: { id_transaksi: id_transaksi } });

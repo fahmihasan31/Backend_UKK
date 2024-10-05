@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   Card,
@@ -16,12 +16,31 @@ import {
 } from "@heroicons/react/24/solid";
 
 export function AdminSidebar() {
-  const navigate = useNavigate(); // Initialize useNavigate hook
-  const [activeIndex, setActiveIndex] = useState(0); // Default to Dashboard
+  const navigate = useNavigate();
+
+  // Get the stored index from localStorage or default to 0
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const savedIndex = localStorage.getItem("activeIndex");
+    return savedIndex !== null ? parseInt(savedIndex) : 0;
+  });
+
+  // This effect will run when activeIndex changes
+  useEffect(() => {
+    localStorage.setItem("activeIndex", activeIndex); // Save activeIndex to localStorage
+  }, [activeIndex]);
 
   const handleItemClick = (index, path) => {
-    setActiveIndex(index);
+    setActiveIndex(index); // Update activeIndex state
     navigate(path); // Navigate to the corresponding path
+  };
+
+  // Handle logout logic
+  const handleLogout = () => {
+    localStorage.removeItem("token");    // Hapus token
+    localStorage.removeItem("role");     // Hapus role pengguna
+    localStorage.removeItem("username"); // Hapus username
+    localStorage.removeItem("activeIndex"); // Opsional, hapus sidebar activeIndex
+    navigate("/login");                  // Redirect ke halaman login
   };
 
   return (
@@ -37,7 +56,6 @@ export function AdminSidebar() {
           { label: "Pengguna", icon: <UserCircleIcon className="h-6 w-6" />, path: "/dashboard/admin/pengguna" },
           { label: "Menu", icon: <ShoppingBagIcon className="h-6 w-6" />, path: "/dashboard/admin/menu" },
           { label: "Meja", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/admin/meja" },
-          { label: "Logout", icon: <PowerIcon className="h-6 w-6" />, path: "/login" },
         ].map((item, index) => (
           <ListItem
             key={index}
@@ -54,6 +72,21 @@ export function AdminSidebar() {
             </span>
           </ListItem>
         ))}
+
+        {/* List item untuk Logout */}
+        <ListItem
+          className="hover:bg-red-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2"
+          onClick={handleLogout} // Panggil handleLogout saat Logout di-klik
+        >
+          <ListItemPrefix>
+            <span className="text-red-700 transition-colors duration-300 ease-in-out">
+              <PowerIcon className="h-6 w-6" />
+            </span>
+          </ListItemPrefix>
+          <span className="ml-2 text-red-700 transition-colors duration-300 ease-in-out">
+            Logout
+          </span>
+        </ListItem>
       </List>
     </Card>
   );

@@ -66,7 +66,7 @@ const LoginPage = () => {
                 className="block w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Username"
                 required
-                autocomplete="username"
+                autoComplete="username"
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ const LoginPage = () => {
                 className="block w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Password"
                 required
-                autocomplete="current-password"
+                autoComplete="current-password"
               />
             </div>
             <button
