@@ -13,12 +13,14 @@ exports.addMenu = async (req, res) => {
         message: error.message,
       });
     }
+
     if (!req.file) {
       return res.status(400).json({
         status: false,
         message: 'File tidak boleh kosong',
       });
     }
+
     // Membuat objek menu baru
     const newMenu = {
       nama_menu: req.body.nama_menu,
@@ -27,13 +29,34 @@ exports.addMenu = async (req, res) => {
       deskripsi: req.body.deskripsi,
       gambar: req.file.filename,
     };
+
+    // Validasi semua field harus diisi
     if (!newMenu.nama_menu || !newMenu.jenis || !newMenu.harga || !newMenu.deskripsi || !newMenu.gambar) {
       return res.status(400).json({
         status: false,
-        message: 'Semua field tidak boleh kosong',
+        message: 'Semua field harus diisi',
       });
     }
+
+    // Validasi jenis menu harus makanan atau minuman
+    const allowedJenis = ['makanan', 'minuman'];
+    if (!allowedJenis.includes(newMenu.jenis.toLowerCase())) {
+      return res.status(400).json({
+        status: false,
+        message: 'Jenis harus makanan atau minuman',
+      });
+    }
+
+    // Validasi harga tidak boleh minus
+    if (newMenu.harga < 0 || newMenu.harga === 0) {
+      return res.status(400).json({
+        status: false,
+        message: 'Harga tidak boleh kurang atau sama dengan 0',
+      });
+    }
+
     try {
+      // Menambahkan menu ke database
       const result = await menuModel.create(newMenu);
       return res.status(201).json({
         status: true,
@@ -48,6 +71,7 @@ exports.addMenu = async (req, res) => {
     }
   });
 };
+
 
 exports.getAllMenu = async (req, res) => {
   try {
@@ -77,6 +101,14 @@ exports.findMenu = async (req, res) => {
         }
       }
     })
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: 'Menu tidak ditemukan'
+      })
+    }
+
     return res.status(200).json({
       status: true,
       data: result,
@@ -91,6 +123,16 @@ exports.findMenu = async (req, res) => {
 }
 exports.updateMenu = async (req, res) => {
   const id_menu = req.params.id;
+
+  // Cek apakah menu dengan id_menu tersebut ada
+  const menu = await menuModel.findOne({ where: { id_menu } });
+  if (!menu) {
+    return res.status(404).json({
+      status: false,
+      message: 'Menu dengan ID tersebut tidak ditemukan',
+    });
+  }
+
   const uploadMenu = upload.single('gambar');
 
   uploadMenu(req, res, async (error) => {
@@ -100,41 +142,109 @@ exports.updateMenu = async (req, res) => {
         message: error.message,
       });
     }
-    let menu = await menuModel.findOne({ where: { id_menu: id_menu } });
+
+    // Validasi bahwa semua field harus diisi
+    const { nama_menu, jenis, harga, deskripsi } = req.body;
+
+    if (!nama_menu || !jenis || !harga || !deskripsi) {
+      return res.status(400).json({
+        status: false,
+        message: 'Semua field harus diisi',
+      });
+    }
+
+    // Validasi jenis menu harus makanan atau minuman
+    const allowedJenis = ['makanan', 'minuman'];
+    if (!allowedJenis.includes(jenis.toLowerCase())) {
+      return res.status(400).json({
+        status: false,
+        message: 'Jenis harus makanan atau minuman',
+      });
+    }
+
+    // Validasi harga tidak boleh minus atau sama dengan nol
+    if (harga <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: 'Harga tidak boleh kurang atau sama dengan 0',
+      });
+    }
+
+    // Buat objek update data
+    const updatedData = {
+      nama_menu: nama_menu,
+      jenis: jenis.toLowerCase(),
+      harga: harga,
+      deskripsi: deskripsi,
+    };
+
+    // Validasi jika tidak ada file gambar diunggah
+    if (!req.file) {
+      return res.status(400).json({
+        status: false,
+        message: 'File tidak boleh kosong',
+      });
+    }
+
+    // Jika ada file gambar yang diupload, hapus gambar lama
     if (req.file) {
-      let oldImage = menu.gambar;
+      let oldImage = menu.gambar; // Mengambil nama gambar lama
       let pathFile = path.join(__dirname, '../menu-image', oldImage);
       if (fs.existsSync(pathFile)) {
-        fs.unlinkSync(pathFile);
+        fs.unlinkSync(pathFile); // Hapus gambar lama
       }
-      req.body.gambar = req.file.filename;
+      updatedData.gambar = req.file.filename; // Set gambar baru
     }
-    const result = await menuModel.update(req.body, { where: { id_menu: id_menu } });
-    return res.status(200).json({
-      status: true,
-      data: result,
-      message: 'Menu berhasil diupdate',
-    });
+
+    try {
+      // Update data menu di database
+      const result = await menuModel.update(updatedData, { where: { id_menu } });
+
+      return res.status(200).json({
+        status: true,
+        data: result,
+        message: 'Menu berhasil diupdate',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: error.message,
+      });
+    }
   });
 };
 
 exports.deleteMenu = async (req, res) => {
-  const id_menu = req.params.id
+  const id_menu = req.params.id;
+
   try {
-    let menu = await menuModel.findOne({ where: { id_menu: id_menu } })
-    let pathFile = path.join(__dirname, `../menu-image`, menu.gambar)
-    if (fs.existsSync(pathFile)) {
-      fs.unlinkSync(pathFile, error => { console.log(error) })
+    // Cek apakah menu dengan id_menu tersebut ada
+    let menu = await menuModel.findOne({ where: { id_menu: id_menu } });
+
+    // Jika menu tidak ditemukan, kembalikan pesan error
+    if (!menu) {
+      return res.status(404).json({
+        status: false,
+        message: 'Menu dengan ID tersebut tidak ditemukan',
+      });
     }
-    const result = await menuModel.destroy({ where: { id_menu: id_menu } })
+
+    // Menghapus gambar dari server
+    let pathFile = path.join(__dirname, `../menu-image`, menu.gambar);
+    if (fs.existsSync(pathFile)) {
+      fs.unlinkSync(pathFile);
+    }
+
+    // Menghapus menu dari database
+    await menuModel.destroy({ where: { id_menu: id_menu } });
     return res.status(200).json({
       status: true,
-      message: 'Menu berhasil di hapus'
-    })
+      message: 'Menu berhasil dihapus',
+    });
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: error.message
-    })
+      message: error.message,
+    });
   }
-}
+};

@@ -21,8 +21,10 @@ exports.getAllUser = async (req, res) => {
     })
   }
 };
+
 exports.findUser = async (req, res) => {
   const keyword = req.params.key;
+
   try {
     let users = await userModel.findAll({
       where: {
@@ -34,6 +36,14 @@ exports.findUser = async (req, res) => {
         ]
       }
     });
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: `User tidak ditemukan`
+      });
+    }
+
     return res.status(200).json({
       status: true,
       data: users,
@@ -57,7 +67,7 @@ exports.updateUserRole = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: `User dengan id: ${id} tidak ditemukan`
+        message: `User dengan id tersebut tidak ditemukan`
       });
     }
     const validRoles = ['admin', 'kasir', 'manajer'];
@@ -72,7 +82,7 @@ exports.updateUserRole = async (req, res) => {
 
     return res.json({
       success: true,
-      message: `Role user dengan id: ${id} berhasil diupdate`
+      message: `Role user berhasil diupdate`
     });
   } catch (error) {
     return res.status(500).json({
@@ -85,13 +95,32 @@ exports.updateUserRole = async (req, res) => {
 
 exports.UpdateUser = async (req, res) => {
   const id_user = req.params.id
-  const updateUser = {
-    nama_user: req.body.nama_user,
-    role: req.body.role,
-    username: req.body.username,
-    password: req.body.password,
+  const { nama_user, role, username, password } = req.body;
+
+  // Cek apakah semua field yang diperlukan diisi
+  if (!nama_user || !role || !username) {
+    return res.status(400).json({
+      status: false,
+      message: 'Semua field harus diisi'
+    });
   }
+
+  const updateUser = {
+    nama_user,
+    role,
+    username,
+    password,
+  };
+
   try {
+    const user = await userModel.findOne({ where: { id_user } });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User dengan ID tersebut tidak ditemukan'
+      });
+    }
+
     if (updateUser.password) {     //cek jika password dikirimkan, lakukan hash
       const salt = await bcrypt.genSalt(10) //generate salt
       updateUser.password = await bcrypt.hash(updateUser.password, salt) //hash password
@@ -127,6 +156,15 @@ exports.addUser = async (req, res) => {
       message: 'Semua field harus diisi'
     });
   }
+
+  const allowedRoles = ['manajer', 'admin', 'kasur'];
+  if (!allowedRoles.includes(role.toLowerCase())) {
+    return res.status(400).json({
+      status: false,
+      message: 'Role harus salah satu dari: manajer, admin, atau kasur  '
+    });
+  }
+
   const hashedPassword = bcrypt.hashSync(password, 10);
   // Buat objek user baru
   const newUser = {
@@ -166,23 +204,35 @@ exports.addUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const data = req.params.id
-    if (!data) {
+
+    // Cek apakah ID valid (tidak kosong dan merupakan angka)
+    if (!data || isNaN(data)) {
+      return res.status(400).json({
+        status: false,
+        message: 'ID tidak valid. Harap masukkan ID yang benar.'
+      })
+    }
+
+    // Proses penghapusan user
+    const result = await userModel.destroy({ where: { id_user: data } })
+
+    // Cek apakah user berhasil dihapus (jika result > 0, berarti ada record yang dihapus)
+    if (result === 0) {
       return res.status(404).json({
         status: false,
         message: 'User tidak ditemukan'
       })
-    } else {
-      const result = await userModel.destroy({ where: { id_user: data } })
-      return res.status(200).json({
-        status: true,
-        data: result,
-        message: 'User berhasil di hapus'
-      })
     }
+
+    return res.status(200).json({
+      status: true,
+      data: result,
+      message: 'User berhasil dihapus'
+    })
   } catch (error) {
-    return res.status(400).json({
+    return res.status(500).json({
       status: false,
-      message: error.message
+      message: 'Terjadi kesalahan pada server: ' + error.message
     })
   }
 }

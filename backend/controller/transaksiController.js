@@ -38,8 +38,7 @@ exports.getTransaksiByIdUser = async (req, res) => {
     if (result.length === 0) {
       return res.json({
         status: true,
-        message: "Tidak ada transaksi ditemukan untuk user ini.",
-        data: [],
+        message: "Tidak ada transaksi .",
       });
     }
 
