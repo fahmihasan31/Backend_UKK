@@ -3,7 +3,6 @@ const upload = require(`./upload-menu`)
 const path = require(`path`)
 const fs = require(`fs`)
 const { Op } = require(`sequelize`)
-
 exports.addMenu = async (req, res) => {
   const uploadMenu = upload.single('gambar');
   uploadMenu(req, res, async (error) => {
@@ -38,6 +37,14 @@ exports.addMenu = async (req, res) => {
       });
     }
 
+    // Validasi harga harus berupa angka
+    if (isNaN(newMenu.harga)) {
+      return res.status(400).json({
+        status: false,
+        message: 'Harga harus berupa angka',
+      });
+    }
+
     // Validasi jenis menu harus makanan atau minuman
     const allowedJenis = ['makanan', 'minuman'];
     if (!allowedJenis.includes(newMenu.jenis.toLowerCase())) {
@@ -47,8 +54,8 @@ exports.addMenu = async (req, res) => {
       });
     }
 
-    // Validasi harga tidak boleh minus
-    if (newMenu.harga < 0 || newMenu.harga === 0) {
+    // Validasi harga tidak boleh minus atau 0
+    if (newMenu.harga <= 0) {
       return res.status(400).json({
         status: false,
         message: 'Harga tidak boleh kurang atau sama dengan 0',
@@ -56,6 +63,18 @@ exports.addMenu = async (req, res) => {
     }
 
     try {
+      // Cek apakah menu dengan nama yang sama sudah ada
+      const existMenu = await menuModel.findOne({
+        where: { nama_menu: newMenu.nama_menu }
+      });
+
+      if (existMenu) {
+        return res.status(400).json({
+          status: false,
+          message: 'Menu dengan nama tersebut sudah ada',
+        });
+      }
+
       // Menambahkan menu ke database
       const result = await menuModel.create(newMenu);
       return res.status(201).json({
@@ -71,7 +90,6 @@ exports.addMenu = async (req, res) => {
     }
   });
 };
-
 
 exports.getAllMenu = async (req, res) => {
   try {
@@ -153,6 +171,14 @@ exports.updateMenu = async (req, res) => {
       });
     }
 
+    // Validasi harga harus berupa angka
+    if (isNaN(harga)) {
+      return res.status(400).json({
+        status: false,
+        message: 'Harga harus berupa angka',
+      });
+    }
+
     // Validasi jenis menu harus makanan atau minuman
     const allowedJenis = ['makanan', 'minuman'];
     if (!allowedJenis.includes(jenis.toLowerCase())) {
@@ -167,6 +193,21 @@ exports.updateMenu = async (req, res) => {
       return res.status(400).json({
         status: false,
         message: 'Harga tidak boleh kurang atau sama dengan 0',
+      });
+    }
+
+    // Cek apakah nama menu sudah ada, kecuali menu yang sedang di-update
+    const existMenu = await menuModel.findOne({
+      where: {
+        nama_menu,
+        id_menu: { [Op.ne]: id_menu }  // Pastikan ID menu yang berbeda
+      }
+    });
+
+    if (existMenu) {
+      return res.status(400).json({
+        status: false,
+        message: 'Menu dengan nama tersebut sudah ada',
       });
     }
 

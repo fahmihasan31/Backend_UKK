@@ -94,7 +94,7 @@ exports.updateUserRole = async (req, res) => {
 };
 
 exports.UpdateUser = async (req, res) => {
-  const id_user = req.params.id
+  const id_user = req.params.id;
   const { nama_user, role, username, password } = req.body;
 
   // Cek apakah semua field yang diperlukan diisi
@@ -102,6 +102,29 @@ exports.UpdateUser = async (req, res) => {
     return res.status(400).json({
       status: false,
       message: 'Semua field harus diisi'
+    });
+  }
+
+  if (username.length < 5) {
+    return res.status(400).json({
+      status: false,
+      message: 'Username harus minimal 5 karakter'
+    });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({
+      status: false,
+      message: 'Password harus minimal 8 karakter'
+    });
+  }
+
+  // Validasi role
+  const validRoles = ['admin', 'manajer', 'kasir'];
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({
+      status: false,
+      message: 'Role harus salah satu dari: admin, manajer, atau kasir'
     });
   }
 
@@ -121,10 +144,13 @@ exports.UpdateUser = async (req, res) => {
       });
     }
 
-    if (updateUser.password) {     //cek jika password dikirimkan, lakukan hash
-      const salt = await bcrypt.genSalt(10) //generate salt
-      updateUser.password = await bcrypt.hash(updateUser.password, salt) //hash password
+    // Cek jika password dikirimkan, lakukan hash
+    if (updateUser.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateUser.password = await bcrypt.hash(updateUser.password, salt);
     }
+
+    // Cek jika username sudah ada di user lain
     const existUser = await userModel.findOne({
       where: { username: updateUser.username, id_user: { [Op.ne]: id_user } },
     });
@@ -132,24 +158,27 @@ exports.UpdateUser = async (req, res) => {
       return res.status(400).json({
         status: false,
         message: 'Username sudah ada'
-      })
+      });
     }
-    const result = await userModel.update(updateUser, { where: { id_user } })
+
+    const result = await userModel.update(updateUser, { where: { id_user } });
     return res.status(200).json({
       status: true,
-      message: 'data User berhasil di update'
-    })
+      message: 'Data User berhasil di update'
+    });
   } catch (error) {
     return res.status(400).json({
       status: false,
       message: error.message
-    })
+    });
   }
-}
+};
 
-//register User
+//add User
 exports.addUser = async (req, res) => {
   const { nama_user, role, username, password } = req.body;
+
+  // Cek apakah semua field yang diperlukan diisi
   if (!nama_user || !role || !username || !password) {
     return res.status(400).json({
       status: false,
@@ -157,15 +186,33 @@ exports.addUser = async (req, res) => {
     });
   }
 
-  const allowedRoles = ['manajer', 'admin', 'kasur'];
-  if (!allowedRoles.includes(role.toLowerCase())) {
+  // Validasi panjang username dan password
+  if (username.length < 5) {
     return res.status(400).json({
       status: false,
-      message: 'Role harus salah satu dari: manajer, admin, atau kasur  '
+      message: 'Username harus minimal 5 karakter'
     });
   }
 
+  if (password.length < 8) {
+    return res.status(400).json({
+      status: false,
+      message: 'Password harus minimal 8 karakter'
+    });
+  }
+
+  // Validasi role
+  const allowedRoles = ['manajer', 'admin', 'kasir'];
+  if (!allowedRoles.includes(role.toLowerCase())) {
+    return res.status(400).json({
+      status: false,
+      message: 'Role harus salah satu dari: manajer, admin, atau kasir'
+    });
+  }
+
+  // Hash password
   const hashedPassword = bcrypt.hashSync(password, 10);
+
   // Buat objek user baru
   const newUser = {
     nama_user,
@@ -198,7 +245,8 @@ exports.addUser = async (req, res) => {
       message: error.message
     });
   }
-}
+};
+
 
 //delete User
 exports.deleteUser = async (req, res) => {
