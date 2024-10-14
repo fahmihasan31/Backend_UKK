@@ -3,11 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Login from './pages/login/LoginPage'
 
 import AdminLayout from './components/layout/AdminLayout'
-import AdminDashboard from './pages/admin/adminDashboard'
-import Pengguna from './pages/admin/pengguna'
-// import UserForm from './pages/admin/userForm'
-import Menu from './pages/admin/menu'
-import Meja from './pages/admin/meja'
+import AdminDashboard from './pages/admin/dashboard/adminDashboard'
+import Pengguna from './pages/admin/pengguna/pengguna'
+import Menu from './pages/admin/menu/menu'
+import Meja from './pages/admin/meja/meja'
 
 import ManajerDashboard from './pages/manajer/ManajerDashboard';
 import KasirDashboard from './pages/kasir/KasirDashboard';

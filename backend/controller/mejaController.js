@@ -139,7 +139,7 @@ exports.updateMeja = async (req, res) => {
     if (existingMeja) {
       return res.status(400).json({
         status: false,
-        message: `Nomor meja ${nomor_meja} sudah digunakan oleh meja lain`
+        message: `Nomor meja ${nomor_meja} sudah ada`
       });
     }
 

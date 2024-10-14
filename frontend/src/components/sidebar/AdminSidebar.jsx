@@ -30,11 +30,17 @@ export function AdminSidebar() {
   }, [activeIndex]);
 
   const handleItemClick = (index, path) => {
-    setActiveIndex(index); // Update activeIndex state
+    // Cek apakah item yang di-klik sudah aktif
+    if (activeIndex === index) return; // Jika sudah aktif, tidak lakukan apapun
+
+    // Cek apakah path yang dituju sama dengan yang sedang aktif
+    if (window.location.pathname === path) return;
+
+    setActiveIndex(index); // Update activeIndex state jika item baru diklik
     navigate(path); // Navigate to the corresponding path
   };
 
-  // Handle logout logic
+  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");    // Hapus token
     localStorage.removeItem("role");     // Hapus role pengguna
