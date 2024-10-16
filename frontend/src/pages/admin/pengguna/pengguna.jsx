@@ -3,7 +3,6 @@ import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
 import AddUserModal from './fragments/tambah'; // Adjust the path if needed
 import EditUserModal from './fragments/edit';
 
-
 const Pengguna = () => {
   const [users, setUsers] = useState([
     { id: 1, name: 'John Doe', username: 'johndoe', role: 'Admin' },

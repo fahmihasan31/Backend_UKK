@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import {
   Card,
   Typography,
@@ -17,36 +17,42 @@ import {
 
 export function AdminSidebar() {
   const navigate = useNavigate();
+  const location = useLocation(); // Get current URL path
 
-  // Get the stored index from localStorage or default to 0
+  // Menu item definitions
+  const menuItems = [
+    { label: "Dashboard", icon: <HomeIcon className="h-6 w-6" />, path: "/dashboard/admin" },
+    { label: "Pengguna", icon: <UserCircleIcon className="h-6 w-6" />, path: "/dashboard/admin/pengguna" },
+    { label: "Menu", icon: <ShoppingBagIcon className="h-6 w-6" />, path: "/dashboard/admin/menu" },
+    { label: "Meja", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/admin/meja" },
+  ];
+
+  // Find index from the current URL path or default to 0
   const [activeIndex, setActiveIndex] = useState(() => {
-    const savedIndex = localStorage.getItem("activeIndex");
-    return savedIndex !== null ? parseInt(savedIndex) : 0;
+    const savedIndex = menuItems.findIndex(item => item.path === location.pathname);
+    return savedIndex !== -1 ? savedIndex : 0;
   });
 
-  // This effect will run when activeIndex changes
+  // Update activeIndex when the URL path changes
   useEffect(() => {
-    localStorage.setItem("activeIndex", activeIndex); // Save activeIndex to localStorage
-  }, [activeIndex]);
+    const currentIndex = menuItems.findIndex(item => item.path === location.pathname);
+    if (currentIndex !== -1) {
+      setActiveIndex(currentIndex);
+    }
+  }, [location.pathname, menuItems]);
 
   const handleItemClick = (index, path) => {
-    // Cek apakah item yang di-klik sudah aktif
-    if (activeIndex === index) return; // Jika sudah aktif, tidak lakukan apapun
-
-    // Cek apakah path yang dituju sama dengan yang sedang aktif
-    if (window.location.pathname === path) return;
-
-    setActiveIndex(index); // Update activeIndex state jika item baru diklik
+    if (activeIndex === index) return; // If already active, do nothing
+    setActiveIndex(index); // Update activeIndex state when a new item is clicked
     navigate(path); // Navigate to the corresponding path
   };
 
-  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem("token");    // Hapus token
-    localStorage.removeItem("role");     // Hapus role pengguna
-    localStorage.removeItem("username"); // Hapus username
-    localStorage.removeItem("activeIndex"); // Opsional, hapus sidebar activeIndex
-    navigate("/login");                  // Redirect ke halaman login
+    localStorage.removeItem("token");    // Remove token
+    localStorage.removeItem("role");     // Remove user role
+    localStorage.removeItem("username"); // Remove username
+    localStorage.removeItem("activeIndex"); // Optionally remove activeIndex
+    navigate("/login");                  // Redirect to login page
   };
 
   return (
@@ -57,12 +63,7 @@ export function AdminSidebar() {
         </Typography>
       </div>
       <List className="flex flex-col space-y-2">
-        {[
-          { label: "Dashboard", icon: <HomeIcon className="h-6 w-6" />, path: "/dashboard/admin" },
-          { label: "Pengguna", icon: <UserCircleIcon className="h-6 w-6" />, path: "/dashboard/admin/pengguna" },
-          { label: "Menu", icon: <ShoppingBagIcon className="h-6 w-6" />, path: "/dashboard/admin/menu" },
-          { label: "Meja", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/admin/meja" },
-        ].map((item, index) => (
+        {menuItems.map((item, index) => (
           <ListItem
             key={index}
             className={`hover:bg-blue-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2 ${activeIndex === index ? "bg-blue-100" : ""}`}
@@ -79,10 +80,10 @@ export function AdminSidebar() {
           </ListItem>
         ))}
 
-        {/* List item untuk Logout */}
+        {/* Logout list item */}
         <ListItem
           className="hover:bg-red-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2"
-          onClick={handleLogout} // Panggil handleLogout saat Logout di-klik
+          onClick={handleLogout} // Call handleLogout on click
         >
           <ListItemPrefix>
             <span className="text-red-700 transition-colors duration-300 ease-in-out">
