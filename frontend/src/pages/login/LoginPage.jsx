@@ -1,15 +1,57 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate dari react-router-dom
-import { handleLogin } from "./ApiHandler"; // Import function handleLogin
+import { useNavigate } from "react-router-dom";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import backgroundImage from "../../assets/image-login5.png";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // Gunakan useNavigate untuk redirect
+  const navigate = useNavigate();
+
+  const handleLogin = async (username, password) => {
+    try {
+      const response = await fetch("http://localhost:8000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Login failed with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.token && data.data?.role) {
+        localStorage.setItem("username", username);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.data.role);
+
+        return {
+          success: true,
+          role: data.data.role,
+          message: data.message,
+        };
+      } else {
+        return {
+          success: false,
+          message: "Token atau role tidak ditemukan.",
+        };
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      return {
+        success: false,
+        message: error.message || "Terjadi kesalahan. Silakan coba lagi.",
+      };
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +64,6 @@ const LoginPage = () => {
       setMessage(result.message);
       setIsLoading(false);
 
-      // Redirect berdasarkan role pengguna
       if (result.role === "admin") {
         navigate("/dashboard/admin");
       } else if (result.role === "manajer") {
@@ -39,7 +80,6 @@ const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Gambar Latar Belakang */}
       <div className="hidden lg:flex lg:w-2/5">
         <img
           src={backgroundImage}
@@ -69,9 +109,10 @@ const LoginPage = () => {
                 autoComplete="username"
               />
             </div>
-            <div>
+
+            <div className="relative">
               <input
-                type="password"
+                type={isPasswordVisible ? "text" : "password"}
                 id="password"
                 name="password"
                 value={password}
@@ -81,11 +122,22 @@ const LoginPage = () => {
                 required
                 autoComplete="current-password"
               />
+              {/* Improved icon styling */}
+              <span
+                className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer"
+                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+              >
+                {isPasswordVisible ? (
+                  <AiOutlineEyeInvisible size={24} className="text-gray-500 hover:text-indigo-600 transition-colors duration-300" />
+                ) : (
+                  <AiOutlineEye size={24} className="text-gray-500 hover:text-indigo-600 transition-colors duration-300" />
+                )}
+              </span>
             </div>
+
             <button
               type="submit"
-              className={`w-full py-3 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-colors ${isLoading ? "cursor-not-allowed opacity-50" : ""
-                }`}
+              className={`w-full py-3 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-colors ${isLoading ? "cursor-not-allowed opacity-50" : ""}`}
               disabled={isLoading}
             >
               {isLoading ? "Loading..." : "Masuk"}

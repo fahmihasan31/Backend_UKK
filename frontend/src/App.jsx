@@ -1,10 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login/LoginPage';
 
 import AdminLayout from './components/layout/AdminLayout';
 import AdminDashboard from './pages/admin/dashboard/adminDashboard';
-import ProtectedRoute from './pages/utils/protectedRoute'; // Import ProtectedRoute
 import Pengguna from './pages/admin/pengguna/pengguna';
 import Menu from './pages/admin/menu/menu';
 import Meja from './pages/admin/meja/meja';
@@ -16,33 +15,24 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route exact path="/login" element={<Login />} />
+        {/* Redirect to /login by default */}
+        <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* ProtectedRoute for admin */}
-        <Route path="/dashboard/admin" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
+        <Route path="/login" element={<Login />} />
+
+        {/* Routes for admin */}
+        <Route path="/dashboard/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="pengguna" element={<Pengguna />} />
           <Route path="menu" element={<Menu />} />
           <Route path="meja" element={<Meja />} />
         </Route>
 
-        {/* ProtectedRoute for manager */}
-        <Route path="/dashboard/manajer" element={
-          <ProtectedRoute allowedRoles={['manajer']}>
-            <ManajerDashboard />
-          </ProtectedRoute>
-        } />
+        {/* Routes for manager */}
+        <Route path="/dashboard/manajer" element={<ManajerDashboard />} />
 
-        {/* ProtectedRoute for cashier */}
-        <Route path="/dashboard/kasir" element={
-          <ProtectedRoute allowedRoles={['kasir']}>
-            <KasirDashboard />
-          </ProtectedRoute>
-        } />
+        {/* Routes for cashier */}
+        <Route path="/dashboard/kasir" element={<KasirDashboard />} />
       </Routes>
     </Router>
   );
