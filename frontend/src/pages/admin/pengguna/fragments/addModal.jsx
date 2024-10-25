@@ -1,40 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa'; // Importing icons
+import React, { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing Font Awesome icons
+import axios from 'axios'; // Pastikan Anda telah menginstall axios
 
-const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    role: '',
-    password: '',
-  });
+const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [role, setRole] = useState(''); // State for role
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
+  const [errorMessage, setErrorMessage] = useState(''); // State to store error message
 
-  // Fill the form with selected user data when modal opens
-  useEffect(() => {
-    if (selectedUser) {
-      setFormData({
-        name: selectedUser.name,
-        username: selectedUser.username,
-        role: selectedUser.role,
-        password: '', // Leave password empty initially
-      });
-    }
-  }, [selectedUser]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Call the onEditUser function and pass updated user data
-    onEditUser({ ...formData, id: selectedUser.id });
-    onClose(); // Close the modal
+
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    try {
+      // Kirim data user ke endpoint backend
+      const response = await axios.post(
+        'http://localhost:8000/users/add',
+        { nama_user: name, username, role, password },
+        config
+      );
+
+      onAddUser(response.data);
+
+      // Reset fields setelah berhasil menambahkan user
+      setName('');
+      setUsername('');
+      setRole('');
+      setPassword('');
+      setErrorMessage(''); // Clear any previous error message
+      onClose(); // Tutup modal setelah menambahkan user
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message); // Set error message
+      } else {
+        setErrorMessage('An error occurred while adding the user.'); // Generic error message
+      }
+      console.error('Error adding user:', error);
+    }
   };
 
-  if (!isOpen) return null; // Don't render the modal if it's not open
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -43,13 +56,15 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
         <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
           {/* Modal header */}
           <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit User</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add User</h3>
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
               onClick={onClose}
             >
-              <FaTimes className="w-5 h-5" />
+              <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
               <span className="sr-only">Close modal</span>
             </button>
           </div>
@@ -61,9 +76,8 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
                 <input
                   type="text"
                   id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="Enter user name"
@@ -74,9 +88,8 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
                 <input
                   type="text"
                   id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="Enter username"
@@ -86,9 +99,8 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
                 <label htmlFor="role" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
                 <select
                   id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
                   required
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 >
@@ -104,9 +116,9 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
                   <input
                     type={showPassword ? 'text' : 'password'} // Toggle between text and password
                     id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Enter password"
                   />
@@ -124,12 +136,20 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
                 </div>
               </div>
             </div>
+
+            {/* Display error message if it exists */}
+            {errorMessage && (
+              <div className="text-red-600 text-sm mt-2">
+                {errorMessage}
+              </div>
+            )}
+
             <div className="flex justify-end mt-4">
               <button type="button" onClick={onClose} className="mr-2 text-gray-500 bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-500">
                 Cancel
               </button>
               <button type="submit" className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
-                Save Changes
+                Add User
               </button>
             </div>
           </form>
@@ -139,4 +159,4 @@ const EditUserModal = ({ isOpen, onClose, onEditUser, selectedUser }) => {
   );
 };
 
-export default EditUserModal;
+export default AddUserModal;

@@ -22,9 +22,9 @@ export function AdminSidebar() {
   // Menu item definitions
   const menuItems = [
     { label: "Dashboard", icon: <HomeIcon className="h-6 w-6" />, path: "/dashboard/admin" },
-    { label: "Pengguna", icon: <UserCircleIcon className="h-6 w-6" />, path: "/dashboard/admin/pengguna" },
+    { label: "User", icon: <UserCircleIcon className="h-6 w-6" />, path: "/dashboard/admin/pengguna" },
     { label: "Menu", icon: <ShoppingBagIcon className="h-6 w-6" />, path: "/dashboard/admin/menu" },
-    { label: "Meja", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/admin/meja" },
+    { label: "Table", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/admin/meja" },
   ];
 
   // Find index from the current URL path or default to 0

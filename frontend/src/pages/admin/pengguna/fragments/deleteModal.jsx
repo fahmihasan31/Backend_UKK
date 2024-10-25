@@ -1,0 +1,64 @@
+import React from 'react';
+import axios from 'axios';
+import trashIcon from '../../../../assets/image-delete.jpg'; // Ganti dengan path gambar yang sesuai
+
+const DeleteUserModal = ({ isOpen, onClose, userId, onDeleteUser }) => {
+
+  const handleDelete = async () => {
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    try {
+      // Kirim permintaan delete ke endpoint backend
+      await axios.delete(`http://localhost:8000/users/${userId}`, config);
+      onDeleteUser(userId); // Menghapus user dari frontend setelah berhasil delete
+      onClose(); // Tutup modal setelah delete berhasil 
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="absolute inset-0 bg-gray-600 opacity-50" onClick={onClose} />
+      <div className="relative p-6 w-full max-w-lg max-h-full"> {/* Adjusted width and padding */}
+        <div className="relative p-8 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-8"> {/* Increased padding */}
+          {/* Modal body */}
+          <div className="text-center">
+            {/* Ganti ikon FaTrashAlt dengan gambar */}
+            <img src={trashIcon} alt="Trash Icon" className="mx-auto mb-4 w-20 h-20" /> {/* Adjusted image size */}
+            {/* Teks konfirmasi */}
+            <h3 className="mb-6 text-xl font-normal text-gray-900 dark:text-white"> {/* Larger text */}
+              Are you sure you want to delete this user?
+            </h3>
+            {/* Tombol cancel dan delete */}
+            <div className="flex justify-center space-x-6"> {/* Increased spacing between buttons */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-gray-500 bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-6 py-2.5 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-6 py-2.5"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DeleteUserModal;
