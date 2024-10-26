@@ -112,7 +112,7 @@ exports.UpdateUser = async (req, res) => {
     });
   }
 
-  if (password.length < 8) {
+  if (password && password.length < 8) {
     return res.status(400).json({
       status: false,
       message: 'Password harus minimal 8 karakter'

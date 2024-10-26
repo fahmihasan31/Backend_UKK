@@ -6,11 +6,11 @@ const middleware = require('../middlewares/validateRole');
 // Routes
 
 
-router.post("/", auth.verify, middleware.isAdmin, addMeja);
+router.post("/add", auth.verify, middleware.isAdmin, addMeja);
 router.get("/", getMeja);
 router.get("/search/:key", findMeja);
 router.get("/status/:status", statusMeja);
-router.put("/:id", auth.verify, middleware.isAdmin, updateMeja);
-router.delete("/:id", auth.verify, middleware.isAdmin, deleteMeja);
+router.put("/update/:id", auth.verify, middleware.isAdmin, updateMeja);
+router.delete("/delete/:id", auth.verify, middleware.isAdmin, deleteMeja);
 
 module.exports = router

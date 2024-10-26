@@ -9,7 +9,9 @@ import Menu from './pages/admin/menu/menu';
 import Meja from './pages/admin/meja/meja';
 
 import ManajerDashboard from './pages/manajer/ManajerDashboard';
-import KasirDashboard from './pages/kasir/KasirDashboard';
+
+import KasirLayout from './components/layout/KasirLayout';
+import KasirDashboard from './pages/kasir/dashboard/kasirDashboard';
 
 const App = () => {
   return (
@@ -32,7 +34,8 @@ const App = () => {
         <Route path="/dashboard/manajer" element={<ManajerDashboard />} />
 
         {/* Routes for cashier */}
-        <Route path="/dashboard/kasir" element={<KasirDashboard />} />
+        <Route path="/dashboard/kasir" element={<KasirLayout />} />
+        {/* <Route index element={<KasirDashboard />} /> */}
       </Routes>
     </Router>
   );

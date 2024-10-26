@@ -9,9 +9,9 @@ const middleware = require('../middlewares/validateRole');
 //admin
 router.get("/", auth.verify, middleware.isAdmin, getAllUser);
 router.get("/search/:key", auth.verify, middleware.isAdmin, findUser);
-router.put("/:id", auth.verify, middleware.isAdmin, UpdateUser);
+router.put("/update/:id", auth.verify, middleware.isAdmin, UpdateUser);
 router.put("/role/:id", auth.verify, middleware.isAdmin, updateUserRole);
-router.delete("/:id", auth.verify, middleware.isAdmin, deleteUser);
-router.post("/add", addUser);
+router.delete("/delete/:id", auth.verify, middleware.isAdmin, deleteUser);
+router.post("/add", auth.verify, middleware.isAdmin, addUser);
 
 module.exports = router;

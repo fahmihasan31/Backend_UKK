@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
-// import AddMenuModal from './fragments/addMenuModal';
-// import EditMenuModal from './fragments/updateMenuModal';
-// import DeleteMenuModal from './fragments/deleteMenuModal';
+import AddUserModal from './fragments/addModal';
+import EditUserModal from './fragments/updateModal';
+import DeleteUserModal from './fragments/deleteModal';
 import axios from 'axios';
 
-const MenuManagement = () => {
-  const [menus, setMenus] = useState([]);
+const Menu = () => {
+  const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [menusPerPage, setMenusPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [menuIdToDelete, setMenuIdToDelete] = useState(null);
 
   const token = localStorage.getItem('token');
   const config = {
@@ -23,61 +22,68 @@ const MenuManagement = () => {
     },
   };
 
-  useEffect(() => {
-    const fetchMenus = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/menu', config);
-        const data = response.data.data;
-        setMenus(data);
-        localStorage.setItem('menus', JSON.stringify(data));
-      } catch (error) {
-        console.error('Error fetching menus:', error);
-      }
-    };
+  const fetchItems = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/menu', config);
+      const data = response.data.data;
+      setItems(data);
+      localStorage.setItem('items', JSON.stringify(data));
+    } catch (error) {
+      console.error('Error fetching items:', error);
+    }
+  };
 
-    fetchMenus();
+  useEffect(() => {
+    fetchItems();
   }, []);
+
+  const handleSearch = async (term) => {
+    try {
+      if (term.trim() === '') {
+        fetchItems();
+        return;
+      }
+      const response = await axios.get(`http://localhost:8000/menu/search/${term}`, config);
+      if (response.status !== 200) throw new Error('Network response was not ok');
+      const data = response.data.data;
+      setItems(data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error searching items:', error);
+    }
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     handleSearch(e.target.value);
   };
 
-  const handleAddMenu = (newMenu) => {
-    setMenus([...menus, newMenu]);
-  };
-
-  const handleEditMenu = (id) => {
-    const menuToEdit = menus.find((menu) => menu.id === id);
-    setSelectedMenu(menuToEdit);
+  const handleEditItem = (id) => {
+    const itemToEdit = items.find((item) => item.id_menu === id);
+    setSelectedItem(itemToEdit);
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateMenu = (updatedMenu) => {
-    setMenus(menus.map((menu) => (menu.id === updatedMenu.id ? updatedMenu : menu)));
-  };
-
-  const handleDeleteMenu = (id) => {
-    setMenuIdToDelete(id);
+  const handleDeleteItem = (id) => {
+    const itemToDelete = items.find((item) => item.id_menu === id);
+    setSelectedItem(itemToDelete);
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = (id) => {
-    setMenus(menus.filter((menu) => menu.id !== id));
-  };
-
-  const indexOfLastMenu = currentPage * menusPerPage;
-  const indexOfFirstMenu = indexOfLastMenu - menusPerPage;
-  const currentMenus = menus.slice(indexOfFirstMenu, indexOfLastMenu);
-  const totalPages = Math.ceil(menus.length / menusPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(items.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
+
+
   return (
     <div className="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden p-4">
-      <h1 className="text-2xl font-bold mb-4">Manage Menus</h1>
+      <h1 className="text-2xl font-bold mb-4">Manage Menu</h1>
       <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4">
         <button
           type="button"
@@ -108,7 +114,7 @@ const MenuManagement = () => {
         </div>
       </div>
 
-      {/* Menus Table */}
+      {/* Items Table */}
       <table className="min-w-full mt-4 bg-white dark:bg-gray-800">
         <thead>
           <tr className="w-full bg-gray-200 dark:bg-gray-700">
@@ -117,29 +123,29 @@ const MenuManagement = () => {
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Type</th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Price</th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Description</th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Actions</th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Action</th>
           </tr>
         </thead>
         <tbody>
-          {currentMenus.map((menu) => (
-            <tr key={menu.id} className="border-b dark:border-gray-600">
-              <td className="px-4 py-2 text-sm">
-                <img src={menu.imageUrl} alt={menu.name} className="w-16 h-16 rounded" />
+          {currentItems.map((item, index) => (
+            <tr key={item.id_menu || index} className="border-b dark:border-gray-600">
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                <img src={`http://localhost:8000/menu/image/${item.gambar}`} alt={item.nama_menu} className="w-12 h-12 object-cover" />
               </td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{menu.name}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{menu.type}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{menu.price}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{menu.description}</td>
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{item.nama_menu}</td>
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{item.jenis}</td>
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{item.harga}</td>
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{item.deskripsi}</td>
               <td className="px-4 py-2 flex space-x-2">
                 <button
-                  onClick={() => handleEditMenu(menu.id)}
+                  onClick={() => handleEditItem(item.id_menu)}
                   className="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                 >
                   <FaEdit className="mr-2" />
                   Update
                 </button>
                 <button
-                  onClick={() => handleDeleteMenu(menu.id)}
+                  onClick={() => handleDeleteItem(item.id_menu)}
                   className="flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none dark:focus:ring-red-400"
                 >
                   <FaTrash className="mr-2" />
@@ -151,14 +157,14 @@ const MenuManagement = () => {
         </tbody>
       </table>
 
-      {/* Pagination 2 */}
+      {/* Pagination */}
       <div className="mt-4 flex justify-between items-center">
         <div>
           <span className="mr-2">Show</span>
           <select
-            value={menusPerPage}
+            value={itemsPerPage}
             onChange={(e) => {
-              setMenusPerPage(Number(e.target.value));
+              setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
             className="border rounded-lg p-1"
@@ -188,12 +194,31 @@ const MenuManagement = () => {
         </div>
       </div>
 
-      {/* Add, Edit, Delete Modals
-      <AddMenuModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleAddMenu} />
-      <EditMenuModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} menu={selectedMenu} onSave={handleUpdateMenu} />
-      <DeleteMenuModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} menuId={menuIdToDelete} onDelete={handleConfirmDelete} /> */}
+      {/* Modals */}
+      <AddUserModal fetchItems={fetchItems} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      {selectedItem && (
+        <EditUserModal
+          fetchItems={fetchItems}
+          isOpen={isEditModalOpen}
+          onClose={() => (
+            setSelectedItem(null),
+            setIsEditModalOpen(false)
+          )}
+          item={selectedItem}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteUserModal
+          fetchItems={fetchItems}
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          item={selectedItem}
+        />
+      )}
     </div>
   );
 };
 
-export default MenuManagement;
+export default Menu;

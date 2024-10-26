@@ -5,7 +5,7 @@ import EditUserModal from './fragments/updateModal';
 import DeleteUserModal from './fragments/deleteModal';
 import axios from 'axios';
 
-const Pengguna = () => {
+const Users = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,7 +14,6 @@ const Pengguna = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [userIdToDelete, setUserIdToDelete] = useState(null);
 
   const token = localStorage.getItem('token');
   const config = {
@@ -23,23 +22,27 @@ const Pengguna = () => {
     },
   };
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/users', config);
-        const data = response.data.data;
-        setUsers(data);
-        localStorage.setItem('users', JSON.stringify(data));
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/users', config);
+      const data = response.data.data;
+      setUsers(data);
+      localStorage.setItem('users', JSON.stringify(data));
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchUsers();
   }, []);
 
   const handleSearch = async (term) => {
     try {
+      if (term.trim() === '') {
+        fetchUsers();
+        return;
+      }
       const response = await axios.get(`http://localhost:8000/users/search/${term}`, config);
       if (response.status !== 200) throw new Error('Network response was not ok');
       const data = response.data.data;
@@ -55,28 +58,16 @@ const Pengguna = () => {
     handleSearch(e.target.value);
   };
 
-  const handleAddUser = (newUser) => {
-    const newUserWithId = { ...newUser, id: users.length + 1 };
-    setUsers([...users, newUserWithId]);
-  };
-
   const handleEditUser = (id) => {
-    const userToEdit = users.find((user) => user.id === id);
+    const userToEdit = users.find((user) => user.id_user === id);
     setSelectedUser(userToEdit);
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateUser = (updatedUser) => {
-    setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
-  };
-
   const handleDeleteUser = (id) => {
-    setUserIdToDelete(id);
+    const userToDelete = users.find((user) => user.id_user === id);
+    setSelectedUser(userToDelete);
     setIsDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
   };
 
   const indexOfLastUser = currentPage * usersPerPage;
@@ -122,7 +113,6 @@ const Pengguna = () => {
       </div>
 
       {/* Users Table */}
-      {/* Users Table */}
       <table className="min-w-full mt-4 bg-white dark:bg-gray-800">
         <thead>
           <tr className="w-full bg-gray-200 dark:bg-gray-700">
@@ -140,14 +130,14 @@ const Pengguna = () => {
               <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{user.role}</td>
               <td className="px-4 py-2 flex space-x-2">
                 <button
-                  onClick={() => handleEditUser(user.id)}
+                  onClick={() => handleEditUser(user.id_user)}
                   className="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                 >
                   <FaEdit className="mr-2" />
                   Update
                 </button>
                 <button
-                  onClick={() => handleDeleteUser(user.id)}
+                  onClick={() => handleDeleteUser(user.id_user)}
                   className="flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none dark:focus:ring-red-400"
                 >
                   <FaTrash className="mr-2" />
@@ -197,29 +187,33 @@ const Pengguna = () => {
       </div>
 
       {/* Add User Modal */}
-      <AddUserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddUser={handleAddUser} />
+      <AddUserModal fetchUsers={fetchUsers} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Edit User Modal */}
       {selectedUser && (
         <EditUserModal
+          fetchUsers={fetchUsers}
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => (
+            setSelectedUser(null),
+            setIsEditModalOpen(false)
+          )
+          }
           user={selectedUser}
-          onUpdateUser={handleUpdateUser}
         />
       )}
 
       {/* Delete User Modal */}
       {isDeleteModalOpen && (
         <DeleteUserModal
+          fetchUsers={fetchUsers} // Menyegarkan daftar pengguna
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
-          userId={userIdToDelete}
-          onDeleteUser={handleConfirmDelete}
+          user={selectedUser}
         />
       )}
     </div>
   );
 };
 
-export default Pengguna;
+export default Users;

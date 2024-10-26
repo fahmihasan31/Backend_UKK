@@ -3,6 +3,18 @@ const upload = require(`./upload-menu`)
 const path = require(`path`)
 const fs = require(`fs`)
 const { Op } = require(`sequelize`)
+
+exports.getFoodImage = (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "../menu-image", filename);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Server Error" });
+    }
+  });
+};
+
 exports.addMenu = async (req, res) => {
   const uploadMenu = upload.single('gambar');
   uploadMenu(req, res, async (error) => {

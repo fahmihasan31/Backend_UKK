@@ -8,4 +8,4 @@ const kasirDashboard = () => {
   )
 }
 
-export default kasirDashboard
+export default kasirDashboard;

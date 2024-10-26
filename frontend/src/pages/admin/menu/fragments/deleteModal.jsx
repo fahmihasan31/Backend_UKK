@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import trashIcon from '../../../../assets/image-delete.jpg'; // Ganti dengan path gambar yang sesuai
 
-const DeleteUserModal = ({ isOpen, onClose, user }) => {
-  if (!user) {
+const DeleteMenuModal = ({ isOpen, onClose, item }) => {
+  if (!item) {
     return null;
   }
 
@@ -22,7 +22,7 @@ const DeleteUserModal = ({ isOpen, onClose, user }) => {
 
     try {
       const result = await axios.delete(
-        `http://localhost:8000/users/delete/${user.id_user}`,
+        `http://localhost:8000/menu/delete/${item.id_menu}`,
         config
       );
 
@@ -74,4 +74,4 @@ const DeleteUserModal = ({ isOpen, onClose, user }) => {
   );
 };
 
-export default DeleteUserModal;
+export default DeleteMenuModal;

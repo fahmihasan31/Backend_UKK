@@ -7,8 +7,8 @@ const midTrans = require('../middlewares/validateTrans');
 // Routes
 
 //kasir
-router.post("/", auth.verify, middleware.isKasir, midTrans.addTrans, addTransaksi);
-router.get("/nota/:id", auth.verify, middleware.isKasir, getNota);
+router.post("/add", auth.verify, middleware.isKasir, midTrans.addTrans, addTransaksi);
+router.get("/nota/:id", auth.verify, middleware.isKasir, getNota); //kurang bagus
 //kurang get transaksinya per kasir yang memasukkan authnya
 router.put("/update/:id", auth.verify, middleware.isKasir, midTrans.updateTrans, updateTransaksi);
 

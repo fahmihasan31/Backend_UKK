@@ -2,13 +2,24 @@ import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing Font Awesome icons
 import axios from 'axios'; // Pastikan Anda telah menginstall axios
 
-const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [role, setRole] = useState(''); // State for role
-  const [password, setPassword] = useState('');
+const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
+  const [data, setData] = useState({
+    nama_user: '',
+    username: '',
+    role: '',
+    password: '',
+  });
   const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
   const [errorMessage, setErrorMessage] = useState(''); // State to store error message
+
+  const resetForm = () => {
+    setData({
+      nama_user: '',
+      username: '',
+      role: '',
+      password: '',
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,20 +33,11 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
     try {
       // Kirim data user ke endpoint backend
-      const response = await axios.post(
-        'http://localhost:8000/users/add',
-        { nama_user: name, username, role, password },
-        config
-      );
+      await axios.post(
+        'http://localhost:8000/users/add', data, config);
 
-      onAddUser(response.data);
-
-      // Reset fields setelah berhasil menambahkan user
-      setName('');
-      setUsername('');
-      setRole('');
-      setPassword('');
-      setErrorMessage(''); // Clear any previous error message
+      fetchUsers();
+      resetForm();
       onClose(); // Tutup modal setelah menambahkan user
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
@@ -76,8 +78,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <input
                   type="text"
                   id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={data.name}
+                  onChange={(e) => setData({ ...data, nama_user: e.target.value })}
                   required
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="Enter user name"
@@ -88,8 +90,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <input
                   type="text"
                   id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={data.username}
+                  onChange={(e) => setData({ ...data, username: e.target.value })}
                   required
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="Enter username"
@@ -99,8 +101,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <label htmlFor="role" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
                 <select
                   id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
+                  value={data.role}
+                  onChange={(e) => setData({ ...data, role: e.target.value })}
                   required
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 >
@@ -116,8 +118,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                   <input
                     type={showPassword ? 'text' : 'password'} // Toggle between text and password
                     id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={data.password}
+                    onChange={(e) => setData({ ...data, password: e.target.value })}
                     required
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Enter password"
