@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       // Transaksi dilakukan di satu Meja
       transaksi.belongsTo(models.meja, {
         foreignKey: 'id_meja',
-        as: 'meja'
+        as: 'meja',
       });
       // Transaksi memiliki banyak DetailTransaksi
       transaksi.hasMany(models.detail_transaksi, {
@@ -37,7 +37,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     tgl_transaksi: DataTypes.DATE,
     id_user: DataTypes.INTEGER,
-    id_meja: DataTypes.INTEGER,
+    id_meja: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     nama_pelanggan: DataTypes.STRING,
     status: DataTypes.ENUM('belum_bayar', 'lunas')
   }, {

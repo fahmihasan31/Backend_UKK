@@ -23,7 +23,7 @@ const LoginPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Login failed with status: ${response.status}`);
+        throw new Error(`data yang anda masukkan salah`);
       }
 
       const data = await response.json();

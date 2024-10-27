@@ -8,10 +8,14 @@ import Pengguna from './pages/admin/pengguna/pengguna';
 import Menu from './pages/admin/menu/menu';
 import Meja from './pages/admin/meja/meja';
 
-import ManajerDashboard from './pages/manajer/ManajerDashboard';
+import ManajerLayout from './components/layout/ManajerLayout';
+import ManajerDashboard from './pages/manajer/dashboard/manajerDashboard';
+import DataTransaksi from './pages/manajer/dataTransaksi/dataTransaksi';
 
 import KasirLayout from './components/layout/KasirLayout';
 import KasirDashboard from './pages/kasir/dashboard/kasirDashboard';
+import Transaksi from './pages/kasir/transaksi/transaksi';
+import HistoryTransaksi from './pages/kasir/historyTransaksi/historyTransaksi';
 
 const App = () => {
   return (
@@ -31,11 +35,17 @@ const App = () => {
         </Route>
 
         {/* Routes for manager */}
-        <Route path="/dashboard/manajer" element={<ManajerDashboard />} />
+        <Route path="/dashboard/manajer" element={<ManajerLayout />}>
+          <Route index element={<ManajerDashboard />} />
+          <Route path="data-transaksi" element={<DataTransaksi />} />
+        </Route>
 
         {/* Routes for cashier */}
-        <Route path="/dashboard/kasir" element={<KasirLayout />} />
-        {/* <Route index element={<KasirDashboard />} /> */}
+        <Route path="/dashboard/kasir" element={<KasirLayout />} >
+          <Route index element={<KasirDashboard />} />
+          <Route path="transaksi" element={<Transaksi />} />
+          <Route path="history-transaksi" element={<HistoryTransaksi />} />
+        </Route>
       </Routes>
     </Router>
   );

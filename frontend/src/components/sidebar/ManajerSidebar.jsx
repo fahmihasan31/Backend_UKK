@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   Typography,
@@ -7,23 +7,16 @@ import {
   ListItem,
   ListItemPrefix,
 } from "@material-tailwind/react";
-import {
-  PowerIcon,
-  ShoppingBagIcon,
-  ClockIcon,
-  HomeIcon as DashboardIcon// Icon untuk "History Transaksi"
-} from "@heroicons/react/24/solid";
+import { PresentationChartBarIcon, PowerIcon, HomeIcon } from "@heroicons/react/24/solid";
 
-export function KasirSidebar() {
+export function ManagerSidebar() {
   const navigate = useNavigate();
-  const location = useLocation(); // Get current URL path
+  const location = useLocation();
 
-  // Menu item definitions (Updated)
-  // Perbarui array menuItems
+  // Manager-specific menu items with Dashboard added
   const menuItems = [
-    { label: "Dashboard", icon: <DashboardIcon className="h-6 w-6" />, path: "/dashboard/kasir" }, // Dashboard Kasir
-    { label: "Transaksi", icon: <ShoppingBagIcon className="h-6 w-6" />, path: "/dashboard/kasir/transaksi" },
-    { label: "History Transaksi", icon: <ClockIcon className="h-6 w-6" />, path: "/dashboard/kasir/history-transaksi" },
+    { label: "Dashboard", icon: <HomeIcon className="h-6 w-6" />, path: "/dashboard/manajer" },
+    { label: "Data Transaksi", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/manajer/data-transaksi" },
   ];
 
 
@@ -42,17 +35,17 @@ export function KasirSidebar() {
   }, [location.pathname, menuItems]);
 
   const handleItemClick = (index, path) => {
-    if (activeIndex === index) return; // If already active, do nothing
-    setActiveIndex(index); // Update activeIndex state when a new item is clicked
-    navigate(path); // Navigate to the corresponding path
+    if (activeIndex === index) return;
+    setActiveIndex(index);
+    navigate(path);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");    // Remove token
-    localStorage.removeItem("role");     // Remove user role
-    localStorage.removeItem("username"); // Remove username
-    localStorage.removeItem("activeIndex"); // Optionally remove activeIndex
-    navigate("/login");                  // Redirect to login page
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    localStorage.removeItem("activeIndex");
+    navigate("/login");
   };
 
   return (
@@ -67,7 +60,7 @@ export function KasirSidebar() {
           <ListItem
             key={index}
             className={`hover:bg-blue-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2 ${activeIndex === index ? "bg-blue-100" : ""}`}
-            onClick={() => handleItemClick(index, item.path)} // Call handleItemClick with index and path
+            onClick={() => handleItemClick(index, item.path)}
           >
             <ListItemPrefix>
               <span className={`${activeIndex === index ? "text-blue-700" : "text-gray-700"} transition-colors duration-300 ease-in-out`}>
@@ -83,7 +76,7 @@ export function KasirSidebar() {
         {/* Logout list item */}
         <ListItem
           className="hover:bg-red-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2"
-          onClick={handleLogout} // Call handleLogout on click
+          onClick={handleLogout}
         >
           <ListItemPrefix>
             <span className="text-red-700 transition-colors duration-300 ease-in-out">

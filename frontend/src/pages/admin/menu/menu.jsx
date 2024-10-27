@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
-import AddUserModal from './fragments/addModal';
-import EditUserModal from './fragments/updateModal';
-import DeleteUserModal from './fragments/deleteModal';
+import AddMenuModal from './fragments/addModal';
+import EditMenuModal from './fragments/updateModal';
+import DeleteMenuModal from './fragments/deleteModal';
 import axios from 'axios';
 
 const Menu = () => {
@@ -200,10 +200,10 @@ const Menu = () => {
       </div>
 
       {/* Modals */}
-      <AddUserModal fetchItems={fetchItems} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AddMenuModal fetchItems={fetchItems} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {selectedItem && (
-        <EditUserModal
+        <EditMenuModal
           fetchItems={fetchItems}
           isOpen={isEditModalOpen}
           onClose={() => (
@@ -215,7 +215,7 @@ const Menu = () => {
       )}
 
       {isDeleteModalOpen && (
-        <DeleteUserModal
+        <DeleteMenuModal
           fetchItems={fetchItems}
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}

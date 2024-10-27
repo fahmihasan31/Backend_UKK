@@ -23,10 +23,13 @@ module.exports = {
       },
       id_meja: {
         type: Sequelize.INTEGER,
+        allowNull: true,
         references: {
           model: 'meja', // Referensi ke tabel 'mejas'
           key: 'id_meja'
         },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       nama_pelanggan: {
         type: Sequelize.STRING

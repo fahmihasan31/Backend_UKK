@@ -164,17 +164,29 @@ exports.updateMeja = async (req, res) => {
 
 exports.deleteMeja = async (req, res) => {
   const id_meja = req.params.id;
-  try {
-    // Cek apakah meja dengan id_meja ada
-    const result = await mejaModel.destroy({ where: { id_meja } });
 
-    // Jika tidak ada meja yang dihapus (result = 0)
-    if (result === 0) {
+  try {
+    // Retrieve the meja to check its status
+    const meja = await mejaModel.findOne({ where: { id_meja } });
+
+    // Check if meja exists
+    if (!meja) {
       return res.status(404).json({
         status: false,
-        message: `Meja dengan ID tidak ditemukan`
+        message: `Meja dengan ID ${id_meja} tidak ditemukan`
       });
     }
+
+    // Check if the meja is occupied
+    if (meja.status !== 'kosong') {
+      return res.status(400).json({
+        status: false,
+        message: 'Meja tidak dapat dihapus karena masih terisi'
+      });
+    }
+
+    // If meja is empty, proceed with deletion
+    await mejaModel.destroy({ where: { id_meja } });
 
     return res.status(200).json({
       status: true,

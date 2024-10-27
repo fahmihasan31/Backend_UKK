@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import imageDashboard from "../../../assets/image-login1.jpg";
 
-const kasirDashboard = () => {
+const HistoryTransaksi = () => {
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const kasirDashboard = () => {
   return (
     <>
       <div className="flex flex-col items-center p-4">
-        <h1 className="text-2xl font-bold">Kasir Dashboard</h1>
+        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <p>Welcome, {userName || 'User'} as Kasir! Here you can manage the system.</p>
         <img
           src={imageDashboard}
@@ -26,4 +26,4 @@ const kasirDashboard = () => {
   );
 };
 
-export default kasirDashboard;
+export default HistoryTransaksi;

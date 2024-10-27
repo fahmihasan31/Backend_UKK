@@ -361,7 +361,8 @@ exports.updateTransaksi = async (req, res) => {
   const { status } = req.body;
 
   try {
-    const transaksi = await transaksiModel.findOne({ where: { id_transaksi: id_transaksi } });
+    // Find the specific transaction
+    const transaksi = await transaksiModel.findOne({ where: { id_transaksi } });
 
     if (!transaksi) {
       return res.status(404).json({
@@ -370,12 +371,13 @@ exports.updateTransaksi = async (req, res) => {
       });
     }
 
-    // Update status transaksi
+    // Update the transaction status
     await transaksiModel.update(
       { status },
-      { where: { id_transaksi: id_transaksi } }
+      { where: { id_transaksi } }
     );
 
+    // If the transaction is completed ("lunas"), set meja status to "kosong"
     if (status === "lunas") {
       await mejaModel.update(
         { status: "kosong" },
