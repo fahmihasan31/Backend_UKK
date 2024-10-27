@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const EditUserModal = ({ isOpen, onClose, user }) => {
   if (!user) {
-    return null
+    return null;
   }
 
   const [data, setData] = useState({

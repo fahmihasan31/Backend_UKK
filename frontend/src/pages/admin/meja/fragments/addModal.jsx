@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Pastikan Anda telah menginstall axios
+import axios from 'axios';
 
 const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
+
+
   const [data, setData] = useState({
     nomor_meja: '',
-    status: '',
   });
+
   const [errorMessage, setErrorMessage] = useState(''); // State to store error message
 
   const resetForm = () => {
     setData({
       nomor_meja: '',
-      status: '',
     });
   };
 
@@ -26,18 +27,17 @@ const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
     };
 
     try {
-      // Kirim data meja ke endpoint backend
-      await axios.post(
-        'http://localhost:8000/meja/add', data, config);
+      // Send table number to the backend endpoint
+      await axios.post('http://localhost:8000/meja/add', data, config);
 
       fetchTables();
       resetForm();
       onClose();
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setErrorMessage(error.response.data.message);
+        setErrorMessage(error.response.data.message); // Set error message
       } else {
-        setErrorMessage('An error occurred while adding the table.');
+        setErrorMessage('An error occurred while adding the table.'); // Generic error message
       }
       console.error('Error adding table:', error);
     }
@@ -66,33 +66,17 @@ const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
           </div>
           {/* Modal body */}
           <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 mb-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="nomor_meja" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nomor Meja</label>
-                <input
-                  type="text"
-                  id="nomor_meja"
-                  value={data.nomor_meja}
-                  onChange={(e) => setData({ ...data, nomor_meja: e.target.value })} // Update nomor_meja
-                  required
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Enter table number"
-                />
-              </div>
-              <div>
-                <label htmlFor="status" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-                <select
-                  id="status"
-                  value={data.status}
-                  onChange={(e) => setData({ ...data, status: e.target.value })} // Update status
-                  required
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                >
-                  <option value="">Select status</option>
-                  <option value="available">Terisi</option>
-                  <option value="occupied">Kosong</option>
-                </select>
-              </div>
+            <div className="mb-4">
+              <label htmlFor="nomor_meja" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Table Number</label>
+              <input
+                type="text"
+                id="nomor_meja"
+                value={data.nomor_meja}
+                onChange={(e) => setData({ ...data, nomor_meja: e.target.value })}
+                required
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                placeholder="Enter table number"
+              />
             </div>
 
             {/* Display error message if it exists */}

@@ -130,7 +130,11 @@ const Menu = () => {
           {currentItems.map((item, index) => (
             <tr key={item.id_menu || index} className="border-b dark:border-gray-600">
               <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                <img src={`http://localhost:8000/menu/image/${item.gambar}`} alt={item.nama_menu} className="w-12 h-12 object-cover" />
+                <img
+                  src={`http://localhost:8000/menu/image/${item.gambar}`}
+                  alt={item.nama_menu}
+                  className="w-20 h-20 object-cover rounded-lg "
+                />
               </td>
               <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{item.nama_menu}</td>
               <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{item.jenis}</td>
@@ -155,6 +159,7 @@ const Menu = () => {
             </tr>
           ))}
         </tbody>
+
       </table>
 
       {/* Pagination */}

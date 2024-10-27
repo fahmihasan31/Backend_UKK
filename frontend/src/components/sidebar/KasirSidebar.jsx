@@ -10,7 +10,8 @@ import {
 import {
   PowerIcon,
   ShoppingBagIcon,
-  ClockIcon, // Icon untuk "History Transaksi"
+  ClockIcon,
+  HomeIcon as DashboardIcon// Icon untuk "History Transaksi"
 } from "@heroicons/react/24/solid";
 
 export function KasirSidebar() {
@@ -18,10 +19,13 @@ export function KasirSidebar() {
   const location = useLocation(); // Get current URL path
 
   // Menu item definitions (Updated)
+  // Perbarui array menuItems
   const menuItems = [
+    { label: "Dashboard", icon: <DashboardIcon className="h-6 w-6" />, path: "/dashboard/kasir" }, // Dashboard Kasir
     { label: "Transaksi", icon: <ShoppingBagIcon className="h-6 w-6" />, path: "/dashboard/admin/transaksi" },
     { label: "History Transaksi", icon: <ClockIcon className="h-6 w-6" />, path: "/dashboard/admin/history-transaksi" },
   ];
+
 
   // Find index from the current URL path or default to 0
   const [activeIndex, setActiveIndex] = useState(() => {

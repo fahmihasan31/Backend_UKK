@@ -1,27 +1,21 @@
 import React, { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 
-const EditUserModal = ({ isOpen, onClose, user }) => {
-  if (!user) {
-    return null
+const EditTableModal = ({ isOpen, onClose, table }) => {
+  if (!table) {
+    return null;
   }
 
+  // Initial state based on the provided table data
   const [data, setData] = useState({
-    nama_user: user.nama_user,
-    username: user.username,
-    role: user.role,
-    password: user.password,
+    nomor_meja: table.nomor_meja,
   });
-  const [showPassword, setShowPassword] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState('');
 
   const resetForm = () => {
     setData({
-      nama_user: '',
-      username: '',
-      role: '',
-      password: '',
+      nomor_meja: "",
     });
   };
 
@@ -36,21 +30,17 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
     };
 
     try {
-      await axios.put(
-        `http://localhost:8000/users/update/${user.id_user}`,
-        data,
-        config
-      );
-
+      const response = await axios.put(`http://localhost:8000/meja/update/${table.id_meja}`, data, config);
+      console.log(response)
       resetForm();
-      onClose();
+      onClose(); // Close the modal after successful update
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message);
       } else {
-        setErrorMessage('An error occurred while updating the user.');
+        setErrorMessage('An error occurred while updating the table.');
       }
-      console.error('Error updating user:', error);
+      console.error('Error updating table:', error);
     }
   };
 
@@ -61,85 +51,36 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
       <div className="absolute inset-0 bg-gray-600 opacity-50" onClick={onClose} />
       <div className="relative p-4 w-full max-w-2xl max-h-full">
         <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+          {/* Modal header */}
           <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit User</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Table</h3>
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
               onClick={onClose}
             >
               <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414 1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
               <span className="sr-only">Close modal</span>
             </button>
           </div>
+          {/* Modal body */}
           <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 mb-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={data.nama_user}
-                  onChange={(e) => setData({ ...data, nama_user: e.target.value })}
-                  required
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Enter user name"
-                />
-              </div>
-              <div>
-                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-                <input
-                  type="text"
-                  id="username"
-                  value={data.username}
-                  onChange={(e) => setData({ ...data, username: e.target.value })}
-                  required
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Enter username"
-                />
-              </div>
-              <div>
-                <label htmlFor="role" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
-                <select
-                  id="role"
-                  value={data.role}
-                  onChange={(e) => setData({ ...data, role: e.target.value })}
-                  required
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                >
-                  <option value="">Select role</option>
-                  <option value="admin">Admin</option>
-                  <option value="kasir">Kasir</option>
-                  <option value="manajer">Manajer</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    onChange={(e) => setData({ ...data, password: e.target.value })}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Enter new password (optional)"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  >
-                    {showPassword ? (
-                      <FaEyeSlash className="h-5 w-5 text-gray-500" />
-                    ) : (
-                      <FaEye className="h-5 w-5 text-gray-500" />
-                    )}
-                  </button>
-                </div>
-              </div>
+            <div className="mb-4">
+              <label htmlFor="nomor_meja" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Table Number</label>
+              <input
+                type="text"
+                id="nomor_meja"
+                value={data.nomor_meja}
+                onChange={(e) => setData({ ...data, nomor_meja: e.target.value })}
+                required
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                placeholder="Enter table number"
+              />
             </div>
 
+            {/* Display error message if it exists */}
             {errorMessage && (
               <div className="text-red-600 text-sm mt-2">
                 {errorMessage}
@@ -151,7 +92,7 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
                 Cancel
               </button>
               <button type="submit" className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
-                Update
+                Update Table
               </button>
             </div>
           </form>
@@ -161,4 +102,4 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
   );
 };
 
-export default EditUserModal;
+export default EditTableModal;

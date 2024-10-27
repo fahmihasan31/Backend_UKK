@@ -398,3 +398,30 @@ exports.updateTransaksi = async (req, res) => {
     });
   }
 };
+
+exports.deleteTransaksi = async (request, response) => {
+  let id_transaksi = request.params.id_transaksi;
+  try {
+    let id_transaksis = request.params.id_transaksi;
+    let transakasis = await transaksiModel.findOne({
+      where: {
+        id_transaksi: id_transaksis,
+      },
+    });
+    await detailTransaksiModel.destroy({ where: { id_transaksi: id_transaksi } });
+    await transaksiModel.destroy({ where: { id_transaksi: id_transaksi } });
+    await mejaModel.update(
+      { status: 'kosong' },
+      { where: { id_meja: transakasis.id_meja } }
+    );
+    return response.json({
+      status: true,
+      message: 'Data transaksi berhasil dihapus',
+    });
+  } catch (error) {
+    return response.json({
+      status: false,
+      message: error.message,
+    });
+  }
+};

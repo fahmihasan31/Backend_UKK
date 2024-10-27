@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
-import AddTableModal from './fragments/addModal';
-import EditUserModal from './fragments/updateModal';
-import DeleteTableModal from './fragments/deleteModal';
+import AddTableModal from './fragments/addModal'; // Create a modal for adding tables
+import EditTableModal from './fragments/updateModal'; // Create a modal for editing tables
+import DeleteTableModal from './fragments/deleteModal'; // Create a modal for deleting tables
 import axios from 'axios';
 
 const Tables = () => {
@@ -14,7 +14,7 @@ const Tables = () => {
   const [selectedTable, setSelectedTable] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+  console.log(selectedTable)
   const token = localStorage.getItem('token');
   const config = {
     headers: {
@@ -26,7 +26,6 @@ const Tables = () => {
     try {
       const response = await axios.get('http://localhost:8000/meja', config);
       const data = response.data.data;
-      console.log(data);
       setTables(data);
       localStorage.setItem('tables', JSON.stringify(data));
     } catch (error) {
@@ -40,29 +39,28 @@ const Tables = () => {
 
   const handleSearch = async (term) => {
     try {
-      let response;
-
-      // If the search term is empty, fetch all tables
       if (term.trim() === '') {
         fetchTables();
         return;
-      } else {
-        const isNumeric = !isNaN(term);
-        if (!isNumeric) {
-          response = await axios.get(`http://localhost:8000/meja/status/${term}`, config);
-        } else {
-          response = await axios.get(`http://localhost:8000/meja/search/${term}`, config);
-        }
       }
 
+      // Check if the term is numeric
+      const isNumeric = !isNaN(term);
+      let response;
+      if (isNumeric) {
+        response = await axios.get(`http://localhost:8000/meja/search/${term}`, config);
+      } else {
+        response = await axios.get(`http://localhost:8000/meja/status/${term}`, config);
+      }
       if (response.status !== 200) throw new Error('Network response was not ok');
       const data = response.data.data;
-      setTables(data); // Update tables here
+      setTables(data);
       setCurrentPage(1);
     } catch (error) {
       console.error('Error searching tables:', error);
     }
   };
+
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -70,13 +68,13 @@ const Tables = () => {
   };
 
   const handleEditTable = (id) => {
-    const tableToEdit = tables.find((table) => table.id === id);
+    const tableToEdit = tables.find((table) => table.id_meja === id);
     setSelectedTable(tableToEdit);
     setIsEditModalOpen(true);
   };
 
   const handleDeleteTable = (id) => {
-    const tableToDelete = tables.find((table) => table.id === id);
+    const tableToDelete = tables.find((table) => table.id_meja === id);
     setSelectedTable(tableToDelete);
     setIsDeleteModalOpen(true);
   };
@@ -92,6 +90,7 @@ const Tables = () => {
 
   return (
     <div className="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden p-4">
+      {console.log(selectedTable)}
       <h1 className="text-2xl font-bold mb-4">Manage Tables</h1>
       <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4">
         <button
@@ -134,19 +133,19 @@ const Tables = () => {
         </thead>
         <tbody>
           {currentTables.map((table, index) => (
-            <tr key={table.id_meja || index} className="border-b dark:border-gray-600">
+            <tr key={table.id_menu || index} className="border-b dark:border-gray-600">
               <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{table.nomor_meja}</td>
               <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{table.status}</td>
               <td className="px-4 py-2 flex space-x-2">
                 <button
-                  onClick={() => handleEditTable(table.id)}
+                  onClick={() => handleEditTable(table.id_meja)}
                   className="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                 >
                   <FaEdit className="mr-2" />
                   Update
                 </button>
                 <button
-                  onClick={() => handleDeleteTable(table.id)}
+                  onClick={() => handleDeleteTable(table.id_meja)}
                   className="flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none dark:focus:ring-red-400"
                 >
                   <FaTrash className="mr-2" />
@@ -200,19 +199,17 @@ const Tables = () => {
 
       {/* Edit Table Modal */}
       {selectedTable && (
-        <EditUserModal
+
+        <EditTableModal
           fetchTables={fetchTables}
           isOpen={isEditModalOpen}
-          onClose={() => {
-            setSelectedTable(null);
-            setIsEditModalOpen(false);
-          }}
+          onClose={() => setIsEditModalOpen(false)}
           table={selectedTable}
         />
       )}
 
       {/* Delete Table Modal */}
-      {isDeleteModalOpen && (
+      {selectedTable && (
         <DeleteTableModal
           fetchTables={fetchTables}
           isOpen={isDeleteModalOpen}
