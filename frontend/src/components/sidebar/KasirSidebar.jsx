@@ -48,6 +48,7 @@ export function KasirSidebar() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("id_user");
     localStorage.removeItem("token");    // Remove token
     localStorage.removeItem("role");     // Remove user role
     localStorage.removeItem("username"); // Remove username

@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login/LoginPage';
+import NotFoundPage from './pages/utils/NotFoundPage';
+
+import ProtectedRoute from './pages/utils/protectedRoute';
 
 import AdminLayout from './components/layout/AdminLayout';
 import AdminDashboard from './pages/admin/dashboard/adminDashboard';
@@ -23,11 +26,18 @@ const App = () => {
       <Routes>
         {/* Redirect to /login by default */}
         <Route path="/" element={<Navigate to="/login" />} />
-
+        <Route path="*" element={<NotFoundPage />} />
+        {/* Route for login */}
         <Route path="/login" element={<Login />} />
 
         {/* Routes for admin */}
-        <Route path="/dashboard/admin" element={<AdminLayout />}>
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }>
           <Route index element={<AdminDashboard />} />
           <Route path="pengguna" element={<Pengguna />} />
           <Route path="menu" element={<Menu />} />
@@ -35,13 +45,25 @@ const App = () => {
         </Route>
 
         {/* Routes for manager */}
-        <Route path="/dashboard/manajer" element={<ManajerLayout />}>
+        <Route
+          path="/dashboard/manajer"
+          element={
+            <ProtectedRoute allowedRoles={['manajer']}>
+              <ManajerLayout />
+            </ProtectedRoute>
+          }>
           <Route index element={<ManajerDashboard />} />
           <Route path="data-transaksi" element={<DataTransaksi />} />
         </Route>
 
-        {/* Routes for cashier */}
-        <Route path="/dashboard/kasir" element={<KasirLayout />} >
+        <Route
+          path="/dashboard/kasir"
+          element={
+            <ProtectedRoute allowedRoles={['kasir']}>
+              <KasirLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<KasirDashboard />} />
           <Route path="transaksi" element={<Transaksi />} />
           <Route path="history-transaksi" element={<HistoryTransaksi />} />

@@ -29,7 +29,8 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (data.token && data.data?.role) {
-        localStorage.setItem("username", username);
+        localStorage.setItem("id_user", data.data.id_user);
+        localStorage.setItem("username", data.data.username);
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.data.role);
 

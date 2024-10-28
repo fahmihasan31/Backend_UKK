@@ -54,7 +54,7 @@ exports.getTransaksiByIdUser = async (req, res) => {
   }
 };
 
-exports.getTransaksiManajer = async (request, response) => {
+exports.getTransaksi = async (request, response) => {
   try {
     let result = await transaksiModel.findAll({
       include: [
@@ -82,23 +82,27 @@ exports.getTransaksiManajer = async (request, response) => {
   }
 };
 
-const PDFDocument = require('pdfkit');
-
 exports.getNota = async (req, res) => {
   const id_transaksi = req.params.id;
+
   try {
+    // Ambil data transaksi beserta relasinya
     const transaksi = await transaksiModel.findOne({
       where: { id_transaksi },
       include: [
         { model: userModel, as: 'user', attributes: ['nama_user'] },
         { model: mejaModel, as: 'meja', attributes: ['nomor_meja'] },
         {
-          model: detailTransaksiModel, as: 'detail_transaksi',
-          include: [{ model: menuModel, as: 'menu', attributes: ['id_menu', 'nama_menu', 'harga'] }]
+          model: detailTransaksiModel,
+          as: 'detail_transaksi',
+          include: [
+            { model: menuModel, as: 'menu', attributes: ['id_menu', 'nama_menu', 'harga'] }
+          ]
         }
       ]
     });
 
+    // Jika transaksi tidak ditemukan
     if (!transaksi) {
       return res.status(404).json({
         status: false,
@@ -119,78 +123,22 @@ exports.getNota = async (req, res) => {
         qty: detail.qty,
         subTotal: detail.qty * detail.menu.harga
       })),
-      total_bayar: transaksi.detail_transaksi.reduce((total, detail) => total + (detail.qty * detail.menu.harga), 0),
+      total_bayar: transaksi.detail_transaksi.reduce(
+        (total, detail) => total + (detail.qty * detail.menu.harga),
+        0
+      ),
       status: transaksi.status,
     };
 
-    // Membuat dokumen PDF menggunakan pdfkit
-    const doc = new PDFDocument();
-
-    // Atur header untuk mengunduh file PDF
-    res.setHeader('Content-Disposition', `attachment; filename=Nota_Transaksi_${id_transaksi}.pdf`);
-    res.setHeader('Content-Type', 'application/pdf');
-
-    // Pipe PDF ke response
-    doc.pipe(res);
-
-    // Header Nota
-    doc.fillColor('#333')
-      .fontSize(26)
-      .font('Helvetica-Bold')
-      .text(nota.Nama_Cafe, { align: 'center' })
-      .moveDown(0.5);
-
-    // Info transaksi
-    doc.fillColor('#555')
-      .fontSize(12)
-      .text(`Tanggal: ${nota.tanggal}`, { align: 'center' })
-      .text(`Pelanggan: ${nota.pelanggan}`, { align: 'center' })
-      .text(`Kasir: ${nota.kasir}`, { align: 'center' })
-      .text(`Meja: ${nota.meja}`, { align: 'center' })
-      .moveDown(1);
-
-    // Garis pemisah
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke('#ccc');
-    doc.moveDown(0.5);
-
-    // Detail Pesanan
-    doc.fillColor('#000')
-      .fontSize(14)
-      .text('Detail Pesanan:', { underline: true })
-      .moveDown(0.5);
-
-    // Tabel detail pesanan
-    doc.fillColor('#000').fontSize(12).font('Helvetica');
-    nota.detail_pesanan.forEach((detail, index) => {
-      doc.text(`${index + 1}. ${detail.nama_menu}`, { continued: true })
-        .text(` (Qty: ${detail.qty}) - Rp. ${detail.harga_satuan.toLocaleString()} x ${detail.qty} = Rp. ${detail.subTotal.toLocaleString()}`);
+    // Mengirimkan response
+    return res.status(200).json({
+      status: true,
+      message: 'Nota transaksi berhasil diambil',
+      data: nota
     });
-    doc.moveDown(1);
 
-    // Garis pemisah
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke('#ccc');
-    doc.moveDown(0.5);
-
-    // Total
-    doc.fillColor('#000')
-      .fontSize(14)
-      .font('Helvetica-Bold')
-      .text(`Total Bayar: Rp. ${nota.total_bayar.toLocaleString()}`, { align: 'right' });
-
-    doc.fontSize(12)
-      .text(`Status: ${nota.status}`, { align: 'right' })
-      .moveDown(1);
-
-    // Pesan Terima Kasih
-    doc.fillColor('#000')
-      .fontSize(12)
-      .text('Terima kasih telah berkunjung di Cafe Wikusama!', { align: 'center' })
-      .moveDown(0.5)
-      .text('Kami berharap Anda menikmati pengalaman ini. Sampai jumpa!', { align: 'center' });
-
-    // End the document
-    doc.end();
   } catch (error) {
+    // Menangani error jika terjadi kesalahan server
     return res.status(500).json({
       status: false,
       message: error.message

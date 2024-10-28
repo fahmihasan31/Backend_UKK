@@ -41,6 +41,7 @@ export function ManagerSidebar() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("id_user");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("username");
