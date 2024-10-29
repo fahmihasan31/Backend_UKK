@@ -24,12 +24,11 @@ const KasirPage = () => {
       const response = await axios.get('http://localhost:8000/menu', config);
       const data = response.data.data;
 
-      // console.log(data);
 
       setMenuItems(data);
       const initialQuantities = {};
       data.forEach(item => {
-        initialQuantities[item.id_menu] = 0;
+        initialQuantities[item.id_menu] = null;
       });
       setQuantities(initialQuantities);
     } catch (error) {
@@ -93,7 +92,6 @@ const KasirPage = () => {
       return;
     }
 
-    // Proceed only if the quantity is greater than zero
     if (qty > 0) {
       // Check if the item is already in the cart
       const existingItem = cartItems.find((item) => item.id_menu === menuItem.id_menu);
@@ -186,9 +184,14 @@ const KasirPage = () => {
         </div>
       </div>
 
-      {showCheckout && (
+      {(
         <Checkout
           cartItems={cartItems}
+          totalAmount={totalAmount}
+          setCartItems={setCartItems}
+          setQuantities={setQuantities}
+          setTotalAmount={setTotalAmount}
+          setShowCheckout={setShowCheckout}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaPrint } from 'react-icons/fa'; // Tambahkan FaPrint untuk ikon cetak
+import { FaSearch, FaEdit, FaTrash, FaPrint } from 'react-icons/fa';
 import CetakNotaModal from './fragments/cetakNotaModal';
 import DeleteTransaksiModal from './fragments/deleteModal';
 import EditTransaksiModal from './fragments/updateModal';
@@ -11,7 +11,7 @@ const HistoryTransaksiPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionsPerPage, setTransactionsPerPage] = useState(5);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [isCetakNotaModalOpen, setIsCetakNotaModalOpen] = useState(false); // Modal untuk Cetak Nota
+  const [isCetakNotaModalOpen, setIsCetakNotaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -38,32 +38,32 @@ const HistoryTransaksiPage = () => {
     fetchTransactions();
   }, []);
 
-
-  const handleSearch = async (term) => {
-    try {
-      if (term.trim() === '') {
-        fetchTransactions();
-        return;
-      }
-      const response = await axios.get(`http://localhost:8000/transaksi/search/${term}`, config);
-      if (response.status !== 200) throw new Error('Network response was not ok');
-      const data = response.data.data;
-      setTransactions(data);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error('Error searching transactions:', error);
-    }
-  };
-
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    handleSearch(e.target.value);
+    const term = e.target.value;
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset to the first page on search
   };
+
+  // Filter transactions based on search term
+  const filteredTransactions = transactions.filter((transaction) => {
+    const lowerCaseTerm = searchTerm.toLowerCase();
+    return (
+      transaction.nama_pelanggan.toLowerCase().includes(lowerCaseTerm) ||
+      transaction.status.toLowerCase().includes(lowerCaseTerm)
+    );
+  });
+
+  const indexOfLastTransaction = currentPage * transactionsPerPage;
+  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+
+  // Use filteredTransactions for pagination
+  const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage); // Adjust total pages calculation
 
   const handleCetakNota = (id) => {
     const transactionToPrint = transactions.find((transaction) => transaction.id_transaksi === id);
     setSelectedTransaction(transactionToPrint);
-    setIsCetakNotaModalOpen(true); // Buka modal Cetak Nota
+    setIsCetakNotaModalOpen(true);
   };
 
   const handleEditTransaction = (id) => {
@@ -78,11 +78,6 @@ const HistoryTransaksiPage = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const indexOfLastTransaction = currentPage * transactionsPerPage;
-  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
-  const currentTransactions = transactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
-  const totalPages = Math.ceil(transactions.length / transactionsPerPage);
-
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -91,7 +86,7 @@ const HistoryTransaksiPage = () => {
     <div className="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden p-4">
       <h1 className="text-2xl font-bold mb-4">Manage Transactions</h1>
       <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4">
-        <div className="w-full md:w-1/2">
+        <div className="w-full md:w-1/3">
           <form className="flex items-center">
             <label htmlFor="simple-search" className="sr-only">Search</label>
             <div className="relative w-full">
@@ -123,36 +118,42 @@ const HistoryTransaksiPage = () => {
           </tr>
         </thead>
         <tbody>
-          {currentTransactions.map((transaction, index) => (
-            <tr key={transaction.id_transaksi || index} className="border-b dark:border-gray-600">
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{transaction.tgl_transaksi}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{transaction.nama_pelanggan}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{transaction.status}</td>
-              <td className="px-4 py-2 flex space-x-2">
-                <button
-                  onClick={() => handleCetakNota(transaction.id_transaksi)}
-                  className="flex items-center justify-center text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-400"
-                >
-                  <FaPrint className="mr-2" />
-                  Cetak Nota
-                </button>
-                <button
-                  onClick={() => handleEditTransaction(transaction.id_transaksi)}
-                  className="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                >
-                  <FaEdit className="mr-2" />
-                  Update
-                </button>
-                <button
-                  onClick={() => handleDeleteTransaction(transaction.id_transaksi)}
-                  className="flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none dark:focus:ring-red-400"
-                >
-                  <FaTrash className="mr-2" />
-                  Delete
-                </button>
-              </td>
+          {currentTransactions.length > 0 ? (
+            currentTransactions.map((transaction, index) => (
+              <tr key={transaction.id_transaksi || index} className="border-b dark:border-gray-600">
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{transaction.tgl_transaksi}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{transaction.nama_pelanggan}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{transaction.status}</td>
+                <td className="px-4 py-2 flex space-x-2">
+                  <button
+                    onClick={() => handleCetakNota(transaction.id_transaksi)}
+                    className="flex items-center justify-center text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-400"
+                  >
+                    <FaPrint className="mr-2" />
+                    Cetak Nota
+                  </button>
+                  <button
+                    onClick={() => handleEditTransaction(transaction.id_transaksi)}
+                    className="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                  >
+                    <FaEdit className="mr-2" />
+                    Update
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTransaction(transaction.id_transaksi)}
+                    className="flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none dark:focus:ring-red-400"
+                  >
+                    <FaTrash className="mr-2" />
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">No transactions found.</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
 
@@ -226,5 +227,3 @@ const HistoryTransaksiPage = () => {
 };
 
 export default HistoryTransaksiPage;
-
-

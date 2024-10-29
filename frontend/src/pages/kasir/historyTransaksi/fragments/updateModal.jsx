@@ -22,9 +22,10 @@ const updateTransaksiModal = ({ isOpen, onClose, transaction }) => {
 
     try {
       const result = await axios.put(
-        `http://localhost:8000/transaksi/update/${transaction.id_transaksi}`,
+        `http://localhost:8000/transaksi/update/${transaction.id_transaksi}`, { status: "lunas" },
         config
       );
+      console.log(result)
 
       onClose(); // Close modal after successful deletion
     } catch (error) {

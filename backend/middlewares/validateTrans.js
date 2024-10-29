@@ -32,7 +32,7 @@ const updateTrans = [
   body('status')
     .notEmpty()
     .withMessage('Status harus diisi.')
-    .isIn(['belum_bayar', 'lunas'])
+    .isIn(['lunas'])
     .withMessage('Status harus berupa salah satu dari: belum_bayar, lunas'),
 
   // Middleware untuk memeriksa hasil validasi
