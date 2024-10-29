@@ -6,13 +6,13 @@ const Checkout = ({ cartItems, totalAmount = 0, setCartItems, setQuantities, set
     nama_pelanggan: '',
   });
   const [selectedTable, setSelectedTable] = useState(null);
-  const [tables, setTables] = useState([]); // State to store available tables
-  const [errorMessage, setErrorMessage] = useState(''); // State to store error messages
+  const [tables, setTables] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const token = localStorage.getItem('token');
 
   const config = {
     headers: {
-      Authorization: `Bearer ${token}`, // Fixed the string interpolation
+      Authorization: `Bearer ${token}`,
     },
   };
 
@@ -22,7 +22,7 @@ const Checkout = ({ cartItems, totalAmount = 0, setCartItems, setQuantities, set
       try {
         const response = await axios.get('http://localhost:8000/meja', config);
         console.log(response.data);
-        setTables(response.data.data); // Assuming the response contains the tables
+        setTables(response.data.data);
       } catch (error) {
         console.error('Error fetching tables', error);
       }
@@ -34,11 +34,10 @@ const Checkout = ({ cartItems, totalAmount = 0, setCartItems, setQuantities, set
   const handleCheckout = async () => {
     const id_user = localStorage.getItem('id_user');
     if (!selectedTable || !data.nama_pelanggan) {
-      setErrorMessage("Masukkan nama dan pilih meja"); // Set error message
+      setErrorMessage("Masukkan nama dan pilih meja");
       return;
     }
 
-    // Prepare the checkout body
     const checkoutBody = {
       id_user: id_user,
       id_meja: selectedTable,
@@ -57,24 +56,21 @@ const Checkout = ({ cartItems, totalAmount = 0, setCartItems, setQuantities, set
     try {
       const response = await axios.post('http://localhost:8000/transaksi/add', checkoutBody, config);
       if (response.status === 200) {
-        // Clear the cart and quantities on successful checkout
         setCartItems([]);
         setQuantities({});
         setTotalAmount(0);
         setShowCheckout(true);
       }
       setErrorMessage('');
-      // Optional: Reset form or provide success feedback here
       setData({ nama_pelanggan: '' });
       setSelectedTable(null);
-      // Optionally clear cartItems or redirect user
     } catch (error) {
       if (error.response) {
         console.error('Error during checkout', error.response.data);
-        setErrorMessage(error.response.data.message || "Error during checkout. Please try again."); // Use error message from server if available
+        setErrorMessage(error.response.data.message || "Error during checkout. Please try again.");
       } else {
         console.error('Error during checkout', error);
-        setErrorMessage("Error during checkout. Please try again."); // Set error message on failure
+        setErrorMessage("Error during checkout. Please try again.");
       }
     }
   };
@@ -135,15 +131,15 @@ const Checkout = ({ cartItems, totalAmount = 0, setCartItems, setQuantities, set
         <div className="flex flex-wrap mt-2">
           {tables && tables.map((table) => (
             <button
-              key={table.id_meja} // Assuming table has a unique id field
+              key={table.id_meja}
               onClick={() => setSelectedTable(table.id_meja)}
               className={`py-1 rounded-lg border ${selectedTable === table.id_meja ? 'bg-blue-600 text-white' : table.status === 'terisi' ? 'bg-blue-600 text-white opacity-50 ' : 'bg-gray-200'}`}
               style={{
-                width: 'calc(20% - 0.5rem)', // Adjust width to fit 5 items in a row
-                margin: '0.25rem' // Add some margin between buttons
+                width: 'calc(20% - 0.5rem)',
+                margin: '0.25rem'
               }}
             >
-              {table.nomor_meja} {/* Assuming there is a field for table number */}
+              {table.nomor_meja}
             </button>
           ))}
         </div>

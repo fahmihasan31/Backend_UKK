@@ -25,8 +25,7 @@ const DeleteMenuModal = ({ isOpen, onClose, item }) => {
         `http://localhost:8000/menu/delete/${item.id_menu}`,
         config
       );
-
-      onClose(); // Close modal after successful deletion
+      onClose();
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message);

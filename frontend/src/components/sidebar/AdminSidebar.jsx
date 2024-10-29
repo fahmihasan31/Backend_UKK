@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   Typography,
@@ -16,10 +16,10 @@ import {
 } from "@heroicons/react/24/solid";
 
 export function AdminSidebar() {
-  const navigate = useNavigate();
-  const location = useLocation(); // Get current URL path
+  const navigate = useNavigate(); //mengubah rute
+  const location = useLocation(); // mengambil rute
 
-  // Menu item definitions
+  // Menu khusus admin
   const menuItems = [
     { label: "Dashboard", icon: <HomeIcon className="h-6 w-6" />, path: "/dashboard/admin" },
     { label: "User", icon: <UserCircleIcon className="h-6 w-6" />, path: "/dashboard/admin/pengguna" },
@@ -27,13 +27,13 @@ export function AdminSidebar() {
     { label: "Table", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/admin/meja" },
   ];
 
-  // Find index from the current URL path or default to 0
+  // aktif item menu berdasarkan url saat ini
   const [activeIndex, setActiveIndex] = useState(() => {
     const savedIndex = menuItems.findIndex(item => item.path === location.pathname);
     return savedIndex !== -1 ? savedIndex : 0;
   });
 
-  // Update activeIndex when the URL path changes
+  // memperbarui ketika URL berubah
   useEffect(() => {
     const currentIndex = menuItems.findIndex(item => item.path === location.pathname);
     if (currentIndex !== -1) {
@@ -41,19 +41,22 @@ export function AdminSidebar() {
     }
   }, [location.pathname, menuItems]);
 
+  // fungsi untuk menangani klik menu
   const handleItemClick = (index, path) => {
-    if (activeIndex === index) return; // If already active, do nothing
-    setActiveIndex(index); // Update activeIndex state when a new item is clicked
-    navigate(path); // Navigate to the corresponding path
+    if (activeIndex === index) return;
+    setActiveIndex(index);
+    navigate(path);
   };
 
+
+  //fungsi untuk menangani logout
   const handleLogout = () => {
-    localStorage.removeItem("id_user");    // Remove token
-    localStorage.removeItem("token");    // Remove token
-    localStorage.removeItem("role");     // Remove user role
-    localStorage.removeItem("username"); // Remove username
-    localStorage.removeItem("activeIndex"); // Optionally remove activeIndex
-    navigate("/login");                  // Redirect to login page
+    localStorage.removeItem("id_user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    localStorage.removeItem("activeIndex");
+    navigate("/login");
   };
 
   return (
@@ -68,7 +71,7 @@ export function AdminSidebar() {
           <ListItem
             key={index}
             className={`hover:bg-blue-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2 ${activeIndex === index ? "bg-blue-100" : ""}`}
-            onClick={() => handleItemClick(index, item.path)} // Call handleItemClick with index and path
+            onClick={() => handleItemClick(index, item.path)}
           >
             <ListItemPrefix>
               <span className={`${activeIndex === index ? "text-blue-700" : "text-gray-700"} transition-colors duration-300 ease-in-out`}>
@@ -84,7 +87,7 @@ export function AdminSidebar() {
         {/* Logout list item */}
         <ListItem
           className="hover:bg-red-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2"
-          onClick={handleLogout} // Call handleLogout on click
+          onClick={handleLogout}
         >
           <ListItemPrefix>
             <span className="text-red-700 transition-colors duration-300 ease-in-out">

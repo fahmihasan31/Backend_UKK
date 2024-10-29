@@ -13,20 +13,16 @@ export function ManagerSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Manager-specific menu items with Dashboard added
   const menuItems = [
     { label: "Dashboard", icon: <HomeIcon className="h-6 w-6" />, path: "/dashboard/manajer" },
     { label: "Data Transaksi", icon: <PresentationChartBarIcon className="h-6 w-6" />, path: "/dashboard/manajer/data-transaksi" },
   ];
 
-
-  // Find index from the current URL path or default to 0
   const [activeIndex, setActiveIndex] = useState(() => {
     const savedIndex = menuItems.findIndex(item => item.path === location.pathname);
     return savedIndex !== -1 ? savedIndex : 0;
   });
 
-  // Update activeIndex when the URL path changes
   useEffect(() => {
     const currentIndex = menuItems.findIndex(item => item.path === location.pathname);
     if (currentIndex !== -1) {

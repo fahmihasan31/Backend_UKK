@@ -6,7 +6,6 @@ const EditTableModal = ({ isOpen, onClose, table }) => {
     return null;
   }
 
-  // Initial state based on the provided table data
   const [data, setData] = useState({
     nomor_meja: table.nomor_meja,
   });
@@ -33,7 +32,7 @@ const EditTableModal = ({ isOpen, onClose, table }) => {
       const response = await axios.put(`http://localhost:8000/meja/update/${table.id_meja}`, data, config);
       console.log(response)
       resetForm();
-      onClose(); // Close the modal after successful update
+      onClose();
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message);
@@ -51,6 +50,7 @@ const EditTableModal = ({ isOpen, onClose, table }) => {
       <div className="absolute inset-0 bg-gray-600 opacity-50" onClick={onClose} />
       <div className="relative p-4 w-full max-w-2xl max-h-full">
         <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+
           {/* Modal header */}
           <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Table</h3>

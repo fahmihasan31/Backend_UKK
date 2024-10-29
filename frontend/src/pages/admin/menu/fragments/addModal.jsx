@@ -57,7 +57,7 @@ const AddMenuModal = ({ isOpen, onClose, fetchItems }) => {
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
               onClick={() => {
                 onClose();
-                resetForm(); // Reset form and clear error when closing
+                resetForm(); 
               }}
             >
               <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

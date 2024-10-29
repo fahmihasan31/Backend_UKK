@@ -199,7 +199,6 @@ const Tables = () => {
 
       {/* Edit Table Modal */}
       {selectedTable && (
-
         <EditTableModal
           fetchTables={fetchTables}
           isOpen={isEditModalOpen}

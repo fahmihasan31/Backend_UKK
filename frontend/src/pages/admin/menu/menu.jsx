@@ -79,8 +79,6 @@ const Menu = () => {
     setCurrentPage(pageNumber);
   };
 
-
-
   return (
     <div className="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden p-4">
       <h1 className="text-2xl font-bold mb-4">Manage Menu</h1>
@@ -114,7 +112,7 @@ const Menu = () => {
         </div>
       </div>
 
-      {/* Items Table */}
+      {/* data tabel */}
       <table className="min-w-full mt-4 bg-white dark:bg-gray-800">
         <thead>
           <tr className="w-full bg-gray-200 dark:bg-gray-700">
@@ -159,7 +157,6 @@ const Menu = () => {
             </tr>
           ))}
         </tbody>
-
       </table>
 
       {/* Pagination */}

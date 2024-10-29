@@ -206,7 +206,7 @@ const Users = () => {
       {/* Delete User Modal */}
       {isDeleteModalOpen && (
         <DeleteUserModal
-          fetchUsers={fetchUsers} // Menyegarkan daftar pengguna
+          fetchUsers={fetchUsers}
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           user={selectedUser}

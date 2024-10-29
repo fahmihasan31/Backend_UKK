@@ -26,14 +26,11 @@ export function KasirSidebar() {
     { label: "History Transaksi", icon: <ClockIcon className="h-6 w-6" />, path: "/dashboard/kasir/history-transaksi" },
   ];
 
-
-  // Find index from the current URL path or default to 0
   const [activeIndex, setActiveIndex] = useState(() => {
     const savedIndex = menuItems.findIndex(item => item.path === location.pathname);
     return savedIndex !== -1 ? savedIndex : 0;
   });
 
-  // Update activeIndex when the URL path changes
   useEffect(() => {
     const currentIndex = menuItems.findIndex(item => item.path === location.pathname);
     if (currentIndex !== -1) {
@@ -42,18 +39,18 @@ export function KasirSidebar() {
   }, [location.pathname, menuItems]);
 
   const handleItemClick = (index, path) => {
-    if (activeIndex === index) return; // If already active, do nothing
-    setActiveIndex(index); // Update activeIndex state when a new item is clicked
-    navigate(path); // Navigate to the corresponding path
+    if (activeIndex === index) return;
+    setActiveIndex(index);
+    navigate(path);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("id_user");
-    localStorage.removeItem("token");    // Remove token
-    localStorage.removeItem("role");     // Remove user role
-    localStorage.removeItem("username"); // Remove username
-    localStorage.removeItem("activeIndex"); // Optionally remove activeIndex
-    navigate("/login");                  // Redirect to login page
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    localStorage.removeItem("activeIndex");
+    navigate("/login");
   };
 
   return (
@@ -68,7 +65,7 @@ export function KasirSidebar() {
           <ListItem
             key={index}
             className={`hover:bg-blue-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2 ${activeIndex === index ? "bg-blue-100" : ""}`}
-            onClick={() => handleItemClick(index, item.path)} // Call handleItemClick with index and path
+            onClick={() => handleItemClick(index, item.path)}
           >
             <ListItemPrefix>
               <span className={`${activeIndex === index ? "text-blue-700" : "text-gray-700"} transition-colors duration-300 ease-in-out`}>
@@ -84,7 +81,7 @@ export function KasirSidebar() {
         {/* Logout list item */}
         <ListItem
           className="hover:bg-red-100 transition-colors duration-300 ease-in-out rounded-md flex items-center p-2"
-          onClick={handleLogout} // Call handleLogout on click
+          onClick={handleLogout}
         >
           <ListItemPrefix>
             <span className="text-red-700 transition-colors duration-300 ease-in-out">

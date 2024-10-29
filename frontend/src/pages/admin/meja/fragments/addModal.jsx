@@ -3,12 +3,11 @@ import axios from 'axios';
 
 const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
 
-
   const [data, setData] = useState({
     nomor_meja: '',
   });
 
-  const [errorMessage, setErrorMessage] = useState(''); // State to store error message
+  const [errorMessage, setErrorMessage] = useState('');
 
   const resetForm = () => {
     setData({
@@ -27,7 +26,6 @@ const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
     };
 
     try {
-      // Send table number to the backend endpoint
       await axios.post('http://localhost:8000/meja/add', data, config);
 
       fetchTables();
@@ -35,9 +33,9 @@ const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
       onClose();
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setErrorMessage(error.response.data.message); // Set error message
+        setErrorMessage(error.response.data.message);
       } else {
-        setErrorMessage('An error occurred while adding the table.'); // Generic error message
+        setErrorMessage('An error occurred while adding the table.');
       }
       console.error('Error adding table:', error);
     }
@@ -79,7 +77,7 @@ const AddTableModal = ({ isOpen, onClose, fetchTables }) => {
               />
             </div>
 
-            {/* Display error message if it exists */}
+            {/* Menampilkan error jika ada  */}
             {errorMessage && (
               <div className="text-red-600 text-sm mt-2">
                 {errorMessage}

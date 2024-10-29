@@ -24,7 +24,6 @@ const KasirPage = () => {
       const response = await axios.get('http://localhost:8000/menu', config);
       const data = response.data.data;
 
-
       setMenuItems(data);
       const initialQuantities = {};
       data.forEach(item => {
@@ -73,56 +72,58 @@ const KasirPage = () => {
 
 
   const addToCart = (menuItem) => {
-    // Get the current quantity from the quantities state
+    // Mengambil kuantitas item
     const qty = quantities[menuItem.id_menu];
 
-    // If the quantity is 0, remove the item from the cart
+    // Jika kuantitas item 0, hapus item dari keranjang
     if (qty === 0) {
+      // Filter item dengan id_menu berbeda dari item yang dihapus
       const updatedCart = cartItems.filter((item) => item.id_menu !== menuItem.id_menu);
       setCartItems(updatedCart);
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
-      // Recalculate the total amount
+      // Menghitung total harga dari item yang tersisa di keranjang
       const newTotal = updatedCart.reduce((total, item) => total + item.harga * item.quantity, 0);
       setTotalAmount(newTotal);
-
-      // Hide the checkout section if the cart is empty
       setShowCheckout(updatedCart.length > 0);
-
       return;
     }
 
+    // Jika kuantitas lebih dari 0
     if (qty > 0) {
-      // Check if the item is already in the cart
+      // Cek apakah item sudah ada 
       const existingItem = cartItems.find((item) => item.id_menu === menuItem.id_menu);
       let updatedCart;
 
+      // jik ada, perbarui jumlah kuantitasnya
       if (existingItem) {
-        // If the item already exists, update its quantity
         const updatedItem = {
           ...existingItem,
-          quantity: qty,  // set the cart quantity to the updated qty directly
+          quantity: qty,
         };
+        // Perbarui keranjang item lama dengan item baru
         updatedCart = cartItems.map((item) =>
           item.id_menu === menuItem.id_menu ? updatedItem : item
         );
       } else {
-        // If the item is not in the cart, add it with the current quantity
+
+        // Jika item belum ada di keranjang, tambahkan item baru dengan kuantitasnya
         updatedCart = [...cartItems, { ...menuItem, quantity: qty }];
       }
 
-      // Update the cartItems state and localStorage
+      // Set cartItems dengan cart yang sudah diperbarui
       setCartItems(updatedCart);
+      // Simpan keranjang yang diperbarui ke dalam localStorage
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
-      // Recalculate the total amount with the new quantity
+      // Hitung total harga di keranjang
       const newTotal = updatedCart.reduce((total, item) => total + item.harga * item.quantity, 0);
       setTotalAmount(newTotal);
 
-      // Show the checkout section
       setShowCheckout(true);
     }
   };
+
 
   useEffect(() => {
     fetchItems();

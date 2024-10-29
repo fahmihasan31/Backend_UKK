@@ -27,12 +27,12 @@ const DeleteTableModal = ({ isOpen, onClose, table }) => {
         config
       );
 
-      onClose(); // Close modal after successful deletion
+      onClose()
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message);
       } else {
-        setErrorMessage('An error occurred while deleting the user.');
+        setErrorMessage('An error occurred while deleting the table.');
       }
       console.error('Error deleting user:', error);
     } finally {
@@ -50,7 +50,7 @@ const DeleteTableModal = ({ isOpen, onClose, table }) => {
           <div className="text-center">
             <img src={trashIcon} alt="Trash Icon" className="mx-auto mb-4 w-20 h-20" />
             <h3 className="mb-6 text-xl font-normal text-gray-900 dark:text-white">
-              Are you sure you want to delete this user?
+              Are you sure you want to delete this table?
             </h3>
             <div className="flex justify-center space-x-6">
               <button

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import trashIcon from '../../../../assets/image-delete.jpg'; // Ganti dengan path gambar yang sesuai
+import trashIcon from '../../../../assets/image-delete.jpg';
 
 const DeleteUserModal = ({ isOpen, onClose, user }) => {
   if (!user) {

@@ -1,13 +1,13 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom'; // Allows rendering of child routes
-import { ManagerSidebar } from '../sidebar/ManajerSidebar'; // Import the Admin Sidebar
+import { Outlet } from 'react-router-dom';
+import { ManagerSidebar } from '../sidebar/ManajerSidebar';
 
 const AdminLayout = () => {
   return (
     <div className="flex">
-      <ManagerSidebar /> {/* Sidebar for kasir */}
+      <ManagerSidebar />
       <div className="flex-grow p-4">
-        <Outlet /> {/* This renders the child routes like dashboard, pengguna, menu, etc. */}
+        <Outlet />
       </div>
     </div>
   );

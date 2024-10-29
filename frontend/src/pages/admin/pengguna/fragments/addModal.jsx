@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing Font Awesome icons
-import axios from 'axios'; // Pastikan Anda telah menginstall axios
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
 
 const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
   const [data, setData] = useState({
@@ -9,8 +9,8 @@ const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
     role: '',
     password: '',
   });
-  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
-  const [errorMessage, setErrorMessage] = useState(''); // State to store error message
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const resetForm = () => {
     setData({
@@ -32,18 +32,17 @@ const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
     };
 
     try {
-      // Kirim data user ke endpoint backend
       await axios.post(
         'http://localhost:8000/users/add', data, config);
 
       fetchUsers();
       resetForm();
-      onClose(); // Tutup modal setelah menambahkan user
+      onClose();
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setErrorMessage(error.response.data.message); // Set error message
+        setErrorMessage(error.response.data.message);
       } else {
-        setErrorMessage('An error occurred while adding the user.'); // Generic error message
+        setErrorMessage('An error occurred while adding the user.');
       }
       console.error('Error adding user:', error);
     }
@@ -116,7 +115,7 @@ const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'} // Toggle between text and password
+                    type={showPassword ? 'text' : 'password'}
                     id="password"
                     value={data.password}
                     onChange={(e) => setData({ ...data, password: e.target.value })}
@@ -126,7 +125,7 @@ const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                    onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3"
                   >
                     {showPassword ? (
@@ -139,7 +138,7 @@ const AddUserModal = ({ isOpen, onClose, fetchUsers }) => {
               </div>
             </div>
 
-            {/* Display error message if it exists */}
+            {/* Menampilkan jika ada error */}
             {errorMessage && (
               <div className="text-red-600 text-sm mt-2">
                 {errorMessage}
