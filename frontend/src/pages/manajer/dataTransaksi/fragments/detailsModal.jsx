@@ -81,7 +81,7 @@ const CetakNotaModal = ({ isOpen, onClose, transaction }) => {
     const totalBayar = transaction.detail_transaksi.reduce((total, detail) => total + (detail.qty * detail.menu.harga), 0);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("Total Bayar : ", 140, startY);
+    doc.text("Total Bayar ", 140, startY);
     doc.text(totalBayar.toLocaleString("id-ID", { style: "currency", currency: "IDR" }), 190, startY, { align: "right" });
 
     startY += 10;

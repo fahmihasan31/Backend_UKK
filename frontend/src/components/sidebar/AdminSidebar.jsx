@@ -60,7 +60,7 @@ export function AdminSidebar() {
   };
 
   return (
-    <Card className="h-screen w-full max-w-[20rem] p-4 shadow-xl bg-white border border-gray-200">
+    <Card className="min-h-screen w-full max-w-[20rem] p-4 shadow-xl bg-white border border-gray-200">
       <div className="mb-6 p-4 text-center">
         <Typography variant="h1" color="blue" className="font-bold text-3xl text-blue-600">
           Cafe Wikusama

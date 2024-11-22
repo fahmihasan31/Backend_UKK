@@ -205,7 +205,7 @@ const Menu = () => {
           isOpen={isEditModalOpen}
           onClose={() => (
             setSelectedItem(null),
-            setIsEditModalOpen(false)
+            (false)
           )}
           item={selectedItem}
         />

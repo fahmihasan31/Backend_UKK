@@ -206,14 +206,14 @@ exports.addTransaksi = async (req, res) => {
     if (!meja) {
       return res.status(404).json({
         status: false,
-        message: `Meja dengan  tidak ditemukan.`,
+        message: `Meja dengan tidak ditemukan.`,
       });
     }
 
     if (meja.status === "terisi") {
       return res.status(400).json({
         status: false,
-        message: `Meja dengan ID sudah terisi. Cari meja yang lain.`,
+        message: `Meja dengan sudah terisi. Cari meja yang lain.`,
       });
     }
 
