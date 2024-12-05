@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { FaPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
-import AddUserModal from './fragments/addModal';
-import EditUserModal from './fragments/updateModal';
-import DeleteUserModal from './fragments/deleteModal';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { FaPlus, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
+import AddUserModal from "./fragments/addModal";
+import EditUserModal from "./fragments/updateModal";
+import DeleteUserModal from "./fragments/deleteModal";
+import axios from "axios";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage, setUsersPerPage] = useState(5);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,7 +15,7 @@ const Users = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -24,12 +24,12 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/users', config);
+      const response = await axios.get("http://localhost:8000/users", config);
       const data = response.data.data;
       setUsers(data);
-      localStorage.setItem('users', JSON.stringify(data));
+      localStorage.setItem("users", JSON.stringify(data));
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     }
   };
 
@@ -39,17 +39,21 @@ const Users = () => {
 
   const handleSearch = async (term) => {
     try {
-      if (term.trim() === '') {
+      if (term.trim() === "") {
         fetchUsers();
         return;
       }
-      const response = await axios.get(`http://localhost:8000/users/search/${term}`, config);
-      if (response.status !== 200) throw new Error('Network response was not ok');
+      const response = await axios.get(
+        `http://localhost:8000/users/search/${term}`,
+        config
+      );
+      if (response.status !== 200)
+        throw new Error("Network response was not ok");
       const data = response.data.data;
       setUsers(data);
       setCurrentPage(1);
     } catch (error) {
-      console.error('Error searching users:', error);
+      console.error("Error searching users:", error);
     }
   };
 
@@ -93,7 +97,9 @@ const Users = () => {
         </button>
         <div className="w-full md:w-1/2">
           <form className="flex items-center">
-            <label htmlFor="simple-search" className="sr-only">Search</label>
+            <label htmlFor="simple-search" className="sr-only">
+              Search
+            </label>
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <FaSearch className="w-5 h-5 text-gray-500" />
@@ -116,18 +122,35 @@ const Users = () => {
       <table className="min-w-full mt-4 bg-white dark:bg-gray-800">
         <thead>
           <tr className="w-full bg-gray-200 dark:bg-gray-700">
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Name</th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Username</th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Role</th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Actions</th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">
+              Name
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">
+              Username
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">
+              Role
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
           {currentUsers.map((user, index) => (
-            <tr key={user.id || index} className="border-b dark:border-gray-600">
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{user.nama_user}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{user.username}</td>
-              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{user.role}</td>
+            <tr
+              key={user.id || index}
+              className="border-b dark:border-gray-600"
+            >
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                {user.nama_user}
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                {user.username}
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                {user.role}
+              </td>
               <td className="px-4 py-2 flex space-x-2">
                 <button
                   onClick={() => handleEditUser(user.id_user)}
@@ -175,7 +198,9 @@ const Users = () => {
           >
             Previous
           </button>
-          <span className="text-gray-700">{currentPage} / {totalPages}</span>
+          <span className="text-gray-700">
+            {currentPage} / {totalPages}
+          </span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -187,18 +212,18 @@ const Users = () => {
       </div>
 
       {/* Add User Modal */}
-      <AddUserModal fetchUsers={fetchUsers} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AddUserModal
+        fetchUsers={fetchUsers}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
 
       {/* Edit User Modal */}
       {selectedUser && (
         <EditUserModal
           fetchUsers={fetchUsers}
           isOpen={isEditModalOpen}
-          onClose={() => (
-            setSelectedUser(null),
-            setIsEditModalOpen(false)
-          )
-          }
+          onClose={() => (setSelectedUser(null), setIsEditModalOpen(false))}
           user={selectedUser}
         />
       )}
